@@ -1,0 +1,165 @@
+import { useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
+import Nav from "@/components/Nav";
+import ReactionSummary from "@/components/ReactionSummary";
+import { hostnameOf, naddrDecode, type Release } from "@/lib/nostr";
+import { useReleaseByAddr } from "@/hooks/useReleaseByAddr";
+import { RELEASE_KIND } from "@/config";
+
+export default function ReleasePage() {
+  const { naddr = "" } = useParams();
+
+  const query = useMemo(() => {
+    try {
+      return naddrDecode(naddr);
+    } catch {
+      return null;
+    }
+  }, [naddr]);
+
+  const { release, loading, eose } = useReleaseByAddr(query);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Nav />
+      <main className="container max-w-3xl py-8 sm:py-12">
+      <div className="mb-6">
+        <Link
+          to="/"
+          className="text-[11px] font-mono text-muted-foreground/60 hover:text-primary transition-colors"
+        >
+          ← back to discography
+        </Link>
+      </div>
+
+      {!query && (
+        <div className="text-sm text-red-400 font-mono">
+          invalid naddr in URL
+        </div>
+      )}
+
+      {query && loading && !eose && (
+        <div className="text-xs text-muted-foreground/60 font-mono">
+          loading from relays…
+        </div>
+      )}
+
+      {query && eose && !release && (
+        <div className="text-sm text-muted-foreground/70 font-mono">
+          release not found (or deleted)
+        </div>
+      )}
+
+      {release && <ReleaseDetail release={release} naddr={naddr} />}
+      </main>
+    </div>
+  );
+}
+
+function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) {
+  const addr = `${RELEASE_KIND}:${release.pubkey}:${release.d}`;
+  return (
+    <article className="space-y-8">
+      <header className="space-y-2">
+        <div className="text-[11px] uppercase tracking-widest text-accent">
+          {release.artist}
+        </div>
+        <h1 className="text-2xl sm:text-4xl font-semibold leading-tight">
+          {release.title}
+        </h1>
+        <div className="text-xs sm:text-sm text-muted-foreground">
+          {[release.year, release.medium, release.formatGroup, release.label, release.country]
+            .filter(Boolean)
+            .join(" · ")}
+        </div>
+        {release.source && hostnameOf(release.source) && (
+          <div className="text-xs">
+            <a
+              href={release.source}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-muted-foreground/70 hover:text-primary transition-colors"
+            >
+              view on {hostnameOf(release.source)} ↗
+            </a>
+          </div>
+        )}
+      </header>
+
+      {release.image && (
+        <img
+          src={release.image}
+          alt=""
+          className="w-full max-w-xs sm:max-w-sm rounded-lg border border-border"
+        />
+      )}
+
+      <ReactionSummary addr={addr} />
+
+      {release.notes && (
+        <div className="text-sm whitespace-pre-wrap leading-relaxed text-foreground/90 max-w-prose">
+          {release.notes}
+        </div>
+      )}
+
+      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+        <Field label="type" value={release.type} />
+        <Field label="category" value={release.category} />
+        <Field label="medium" value={release.medium} />
+        <Field label="format" value={release.format} />
+        <Field label="year" value={release.year} />
+        <Field label="label" value={release.label} />
+        <Field label="catalog" value={release.catalog} />
+        <Field label="country" value={release.country} />
+        <Field label="condition" value={release.condition} />
+      </dl>
+
+      {release.tags.length > 0 && (
+        <div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-2">
+            tags
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {release.tags.map((t) => (
+              <span
+                key={t}
+                className="text-[11px] px-2 py-0.5 rounded bg-muted/60 text-muted-foreground"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {release.externalIds.length > 0 && (
+        <div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-2">
+            external ids
+          </div>
+          <ul className="text-xs font-mono text-muted-foreground space-y-1">
+            {release.externalIds.map((i) => (
+              <li key={i}>{i}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="pt-6 border-t border-border/40 text-[10px] text-muted-foreground/40 font-mono break-all">
+        naddr: {naddr}
+      </div>
+    </article>
+  );
+}
+
+function Field({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div className="flex gap-3">
+      <dt className="text-[10px] uppercase tracking-widest text-muted-foreground/50 w-20 mt-1 shrink-0">
+        {label}
+      </dt>
+      <dd className="text-sm">{value}</dd>
+    </div>
+  );
+}

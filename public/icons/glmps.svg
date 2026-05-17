@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="glmps — discography">
+  <!-- Vinyl disc glyph in the cubic family palette -->
+  <defs>
+    <mask id="glmps-spindle" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+      <rect x="0" y="0" width="64" height="64" fill="white"/>
+      <circle cx="32" cy="32" r="2.4" fill="black"/>
+    </mask>
+    <linearGradient id="glmps-label" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+  <g mask="url(#glmps-spindle)">
+    <!-- Disc body: emerald, matches the rest of the icon family -->
+    <circle cx="32" cy="32" r="28" fill="#34d399"/>
+    <!-- Grooves -->
+    <g fill="none" stroke="#0D1117" stroke-opacity="0.25" stroke-width="1">
+      <circle cx="32" cy="32" r="25"/>
+      <circle cx="32" cy="32" r="21"/>
+      <circle cx="32" cy="32" r="17"/>
+    </g>
+    <!-- Label (purple center) -->
+    <circle cx="32" cy="32" r="11" fill="url(#glmps-label)"/>
+  </g>
+</svg>

@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* fizx.uk shared palette — emerald primary (Side A), purple accent (Side B) */
+    --background: 215 28% 7%;       /* #0d1117 */
+    --foreground: 210 40% 98%;
+    --card: 215 22% 10%;
+    --card-foreground: 210 40% 98%;
+    --primary: 158 64% 52%;         /* emerald-400 #34d399 */
+    --primary-foreground: 215 28% 7%;
+    --muted: 215 18% 14%;
+    --muted-foreground: 215 12% 55%;
+    --accent: 263 89% 75%;          /* purple-400 #a78bfa */
+    --accent-foreground: 215 28% 7%;
+    --border: 215 15% 15%;
+    --input: 215 15% 15%;
+    --ring: 158 64% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-mono;
+    font-feature-settings: "ss01", "cv11";
+  }
+}

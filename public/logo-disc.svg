@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ndisc">
+  <title>ndisc</title>
+  <defs>
+    <mask id="spindle" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect x="0" y="0" width="512" height="512" fill="white"/>
+      <!-- Spindle hole, sized like a real 7" record proportion -->
+      <circle cx="256" cy="256" r="14" fill="black"/>
+    </mask>
+    <radialGradient id="vinyl" cx="38%" cy="32%" r="80%">
+      <stop offset="0%"  stop-color="#222a38"/>
+      <stop offset="55%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#04060a"/>
+    </radialGradient>
+    <linearGradient id="label" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a78bfa"/>
+      <stop offset="55%"  stop-color="#6eb09b"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+
+  <g mask="url(#spindle)">
+    <!-- Vinyl disc -->
+    <circle cx="256" cy="256" r="240" fill="url(#vinyl)"/>
+    <!-- Rim definition -->
+    <circle cx="256" cy="256" r="240" fill="none" stroke="#2a3140" stroke-width="2"/>
+    <!-- Groove rings -->
+    <g fill="none" stroke="#1f2533" stroke-width="1.5" opacity="0.95">
+      <circle cx="256" cy="256" r="226"/>
+      <circle cx="256" cy="256" r="214"/>
+      <circle cx="256" cy="256" r="202"/>
+      <circle cx="256" cy="256" r="190"/>
+      <circle cx="256" cy="256" r="178"/>
+      <circle cx="256" cy="256" r="166"/>
+      <circle cx="256" cy="256" r="154"/>
+      <circle cx="256" cy="256" r="142"/>
+      <circle cx="256" cy="256" r="130"/>
+      <circle cx="256" cy="256" r="118"/>
+    </g>
+    <!-- Subtle sheen across the disc -->
+    <ellipse cx="180" cy="170" rx="160" ry="60" fill="#ffffff" opacity="0.04" transform="rotate(-28 180 170)"/>
+    <!-- Colored label -->
+    <circle cx="256" cy="256" r="100" fill="url(#label)"/>
+    <!-- Inner label ring -->
+    <circle cx="256" cy="256" r="100" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.25"/>
+    <!-- Concentric label detail ring -->
+    <circle cx="256" cy="256" r="78" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.18"/>
+  </g>
+</svg>
