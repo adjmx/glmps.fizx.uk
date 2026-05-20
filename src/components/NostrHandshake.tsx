@@ -1,32 +1,18 @@
-import { useMemo } from "react";
-import { nip19 } from "nostr-tools";
-import { useNostrLogin } from "@/hooks/useNostrLogin";
-
-// Shaka glyph that sits in the page header next to AnimatedTitle. Only renders
-// when a user is signed in; clicks through to their njump.me profile. The SVG
-// matches the NstartHand Shaka used on sibling subdomains (Shaka-3 path,
-// now gradient url(#fizx-shaka) — pale-white → blue → emerald, viewBox 0 0 210 282) — keeps glmps visually consistent with
-// the rest of the family. Component name is legacy (it used to be a lucide
-// handshake gated on NIP-05 verification); contents replaced 2026-05-17.
+// Shaka glyph in the nav, beside the login button. Always visible; links to
+// nstart.me (Nostr onboarding) — same behaviour as the NstartHand Shaka on
+// every sibling subdomain, keeping glmps consistent with the rest of the family.
 
 export default function NostrHandshake() {
-  const { pubkey } = useNostrLogin();
-  const njumpUrl = useMemo(
-    () => (pubkey ? `https://njump.me/${nip19.npubEncode(pubkey)}` : "#"),
-    [pubkey],
-  );
-  if (!pubkey) return null;
   return (
     <a
-      href={njumpUrl}
+      href="https://nstart.me/en"
       target="_blank"
       rel="noopener noreferrer"
-      title="Your njump.me profile"
-      aria-label="Your njump.me profile"
+      aria-label="Open nstart.me"
       className="hover:opacity-75 transition-opacity shrink-0"
     >
       <svg
-        className="h-[92px] w-auto"
+        className="h-8 w-auto"
         fill="url(#fizx-shaka)"
         viewBox="0 0 210 282"
       >

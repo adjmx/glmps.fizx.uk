@@ -4,9 +4,12 @@ import type { Release } from "@/lib/nostr";
 type Props = {
   releases: Release[];
   className?: string;
+  // When true, skip the rounded-lg/border/bg outer card styling so the stats
+  // can be embedded cleanly inside an outer container (e.g. the hero card).
+  bare?: boolean;
 };
 
-export default function StatsSummary({ releases, className = "" }: Props) {
+export default function StatsSummary({ releases, className = "", bare = false }: Props) {
   const stats = useMemo(() => {
     const by = (cat: string) =>
       releases.filter((r) => r.category === cat).length;
@@ -15,7 +18,12 @@ export default function StatsSummary({ releases, className = "" }: Props) {
       album: by("album"),
       ep: by("ep"),
       single: by("single"),
-      misc: by("miscellaneous"),
+      // misc = every categorised release that isn't album/ep/single
+      // (compilation, mix, live, soundtrack, bootleg, miscellaneous, …).
+      // Excludes uncategorised releases (no category tag).
+      misc: releases.filter(
+        (r) => r.category && !["album", "ep", "single"].includes(r.category),
+      ).length,
     };
   }, [releases]);
 
@@ -24,7 +32,7 @@ export default function StatsSummary({ releases, className = "" }: Props) {
 
   return (
     <div
-      className={`rounded-lg border border-border/60 bg-card/30 p-3 font-mono ${className}`}
+      className={`${bare ? "font-mono" : "rounded-lg border border-border/60 bg-card/30 p-3 font-mono"} ${className}`}
     >
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">
         discography
@@ -43,16 +51,16 @@ export default function StatsSummary({ releases, className = "" }: Props) {
                 n={stats.album}
               />
             )}
-            {stats.ep > 0 && (
-              <Row label={stats.ep === 1 ? "ep" : "eps"} n={stats.ep} />
+            {(stats.ep > 0 || stats.single > 0) && (
+              <Row label="eps & singles" n={stats.ep + stats.single} />
             )}
-            {stats.single > 0 && (
+            {stats.misc > 0 && (
               <Row
-                label={stats.single === 1 ? "single" : "singles"}
-                n={stats.single}
+                label="comps, mixes, live…"
+                n={stats.misc}
+                title="compilations, mixes, live, soundtracks, bootlegs & miscellaneous"
               />
             )}
-            {stats.misc > 0 && <Row label="misc" n={stats.misc} />}
           </div>
         )}
       </div>
@@ -64,13 +72,15 @@ function Row({
   label,
   n,
   accent,
+  title,
 }: {
   label: string;
   n: number;
   accent?: boolean;
+  title?: string;
 }) {
   return (
-    <div className="flex justify-between items-baseline gap-4">
+    <div className="flex justify-between items-baseline gap-4" title={title}>
       <span className={accent ? "text-foreground/90" : "text-foreground/70"}>
         {label}
       </span>

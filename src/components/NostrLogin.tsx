@@ -6,7 +6,10 @@ export default function NostrLogin() {
   const profile = useProfile(pubkey ?? undefined);
 
   if (pubkey) {
-    const label = profile?.display_name || profile?.name || `${pubkey.slice(0, 8)}…`;
+    // Prefer NIP-05 (name@domain) over kind:0 name/display_name fields, with a
+    // truncated hex pubkey as the ultimate fallback when the user has no
+    // discoverable kind:0 metadata on DEFAULT_RELAYS.
+    const label = profile?.nip05 || profile?.display_name || profile?.name || `${pubkey.slice(0, 8)}…`;
     return (
       <button
         onClick={logout}
@@ -22,7 +25,7 @@ export default function NostrLogin() {
         ) : (
           <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
         )}
-        <span className="hidden sm:inline max-w-[7rem] truncate">{label}</span>
+        <span className="hidden sm:inline max-w-[11rem] truncate">{label}</span>
         <span className="text-muted-foreground/50 ml-0.5">×</span>
       </button>
     );

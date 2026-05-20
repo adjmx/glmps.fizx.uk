@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import AnimatedTitle from "@/components/AnimatedTitle";
-import ProfileHeader from "@/components/ProfileHeader";
 import StatsSummary from "@/components/StatsSummary";
 import ReleaseCard from "@/components/ReleaseCard";
 import ReleaseRow from "@/components/ReleaseRow";
@@ -9,8 +8,6 @@ import FilterBar from "@/components/FilterBar";
 import ViewToggle, { type ViewMode } from "@/components/ViewToggle";
 import RelayStats from "@/components/RelayStats";
 import NewReleaseFab from "@/components/NewReleaseFab";
-import NostrHandshake from "@/components/NostrHandshake";
-import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { useReleases } from "@/hooks/useReleases";
 import { DEFAULT_RELAYS, OWNER_NPUB, RELEASE_KIND } from "@/config";
 import {
@@ -32,7 +29,6 @@ export default function Index() {
     }
   }, []);
 
-  const { profile } = useOwnerProfile();
   const { releases, loading, eose } = useReleases(hex);
 
   const [filters, setFilters] = useState<FilterState>(emptyFilters);
@@ -74,26 +70,27 @@ export default function Index() {
       <Nav />
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
-          <div className="flex items-center justify-between gap-3">
-            <AnimatedTitle
-              accent="glmps"
-              rest="²"
-              from="#34d399"
-              to="#a78bfa"
-              suffixRgba="rgba(52,211,153,0.55)"
-            />
-            <NostrHandshake />
-          </div>
-          <p className="text-[11px] text-foreground/75 mt-2">
-            A public discography — releases published as signed Nostr events.{" "}
-            <span className="inline-block rounded-full bg-accent text-accent-foreground font-mono text-[10px] px-2 py-0.5 align-middle">
-              kind 31237
-            </span>
-          </p>
-          {hex && (
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-[1.5fr_1fr_1.5fr] gap-3 items-start">
-              <div className="rounded-lg border border-border/60 bg-card/30 p-3">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-mono mb-2">
+          {/* Header — hero card: title | relays | discography (single row) */}
+          <div className="bg-card border border-border px-4 py-3 min-h-[110px] flex items-start justify-between gap-5 flex-wrap">
+            <div className="min-w-0 space-y-1">
+              <AnimatedTitle
+                accent="glmps"
+                rest=""
+                from="#34d399"
+                to="#a78bfa"
+                suffixRgba="rgba(52,211,153,0.55)"
+                fontSize="clamp(28px, 5vw, 40px)"
+              />
+              <div className="flex items-center gap-2 text-[10px] font-mono">
+                <span className="text-muted-foreground/70 truncate">Discographies</span>
+                <span className="inline-block rounded-full bg-accent text-accent-foreground font-mono text-[10px] px-2 py-0.5">
+                  Nevent kind 31237
+                </span>
+              </div>
+            </div>
+            {hex && (
+              <div className="font-mono shrink-0">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1.5">
                   relays
                 </div>
                 <RelayStats
@@ -101,10 +98,11 @@ export default function Index() {
                   filter={{ kinds: [RELEASE_KIND], authors: [hex] }}
                 />
               </div>
-              <StatsSummary releases={releases} />
-              <ProfileHeader profile={profile} npub={OWNER_NPUB} />
-            </div>
-          )}
+            )}
+            {hex && (
+              <StatsSummary releases={releases} bare className="shrink-0" />
+            )}
+          </div>
         </div>
 
         {npubError ? (
@@ -203,10 +201,34 @@ export default function Index() {
           </>
         )}
 
-        <footer className="mt-16 pt-6 border-t border-border/40 text-[10px] text-muted-foreground/40 font-mono">
-          a public nostr discography · kind 31237
-        </footer>
       </main>
+      {/* Footer — cross-site chips */}
+      <footer className="border-t border-border px-6 py-4">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs font-mono">
+          <div className="flex items-center gap-4">
+            <a href="https://ln.fizx.uk" className="flex items-center gap-1.5 text-muted-foreground/60 hover:text-primary transition-colors">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="#a78bfa" aria-hidden="true">
+                <path d="M13 2L4.5 13.5H11L10 22L20.5 10.5H14L13 2z"/>
+              </svg>
+              <span>ln<span className="text-muted-foreground/40">.fizx.uk</span></span>
+            </a>
+            <a href="https://recipes.fizx.uk" className="flex items-center gap-1.5 text-muted-foreground/60 hover:text-primary transition-colors">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+              <span>recipes<span className="text-muted-foreground/40">.fizx.uk</span></span>
+            </a>
+            <a href="https://relay.fizx.uk" className="flex items-center gap-1.5 text-muted-foreground/60 hover:text-primary transition-colors">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+              </svg>
+              <span>relay<span className="text-muted-foreground/40">.fizx.uk</span></span>
+            </a>
+          </div>
+          <span className="text-primary/60">✦ built with claude</span>
+        </div>
+      </footer>
       <NewReleaseFab />
     </div>
   );
