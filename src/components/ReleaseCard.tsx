@@ -6,7 +6,6 @@ import { useReactions } from "@/hooks/useReactions";
 import { displayCount } from "@/lib/rating";
 import StarRow from "./StarRow";
 import OwnerNaddrCopy from "./OwnerNaddrCopy";
-import OwnerEditPencil from "./OwnerEditPencil";
 
 export type CardDensity = "default" | "sm";
 
@@ -68,7 +67,6 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
           </span>
         </div>
         <div className="absolute top-1.5 right-1.5 z-10 flex gap-1">
-          <OwnerEditPencil release={release} />
           <OwnerNaddrCopy naddr={naddr} />
         </div>
         {release.image ? (

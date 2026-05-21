@@ -7,7 +7,6 @@ import ReleaseRow from "@/components/ReleaseRow";
 import FilterBar from "@/components/FilterBar";
 import ViewToggle, { type ViewMode } from "@/components/ViewToggle";
 import RelayStats from "@/components/RelayStats";
-import NewReleaseFab from "@/components/NewReleaseFab";
 import { useReleases } from "@/hooks/useReleases";
 import { DEFAULT_RELAYS, OWNER_NPUB, RELEASE_KIND } from "@/config";
 import {
@@ -229,7 +228,6 @@ export default function Index() {
           <span className="text-primary/60">✦ built with claude</span>
         </div>
       </footer>
-      <NewReleaseFab />
     </div>
   );
 }

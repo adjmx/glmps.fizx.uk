@@ -8,7 +8,7 @@ export type Release = {
   d: string;
   title: string;
   artist: string;
-  medium: string;
+  medium?: string;
   format?: string; // raw Discogs descriptor, e.g. `12", EP, Ltd, Num, Cle`
   formatGroup?: string; // collapsed bucket from FORMAT_GROUP_ORDER
   year?: string;
@@ -160,7 +160,7 @@ export function parseRelease(event: NostrEvent): Release | null {
   const title = getTag(event, "title");
   const artist = getTag(event, "artist");
   const medium = getTag(event, "medium");
-  if (!d || !title || !artist || !medium) return null;
+  if (!d || !title || !artist) return null;
   return {
     id: event.id,
     pubkey: event.pubkey,
@@ -343,7 +343,7 @@ function matchesSearch(r: Release, q: string): boolean {
 export function applyFilters(releases: Release[], f: FilterState): Release[] {
   const q = f.search.trim();
   return releases.filter((r) => {
-    if (f.medium.size > 0 && !f.medium.has(r.medium)) return false;
+    if (f.medium.size > 0 && (!r.medium || !f.medium.has(r.medium))) return false;
     if (
       f.format.size > 0 &&
       (!r.formatGroup || !f.format.has(r.formatGroup))

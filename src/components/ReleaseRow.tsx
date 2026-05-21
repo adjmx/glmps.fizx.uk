@@ -5,7 +5,6 @@ import { useReactions } from "@/hooks/useReactions";
 import { displayCount } from "@/lib/rating";
 import StarRow from "./StarRow";
 import OwnerNaddrCopy from "./OwnerNaddrCopy";
-import OwnerEditPencil from "./OwnerEditPencil";
 
 type Props = { release: Release };
 
@@ -84,7 +83,6 @@ export default function ReleaseRow({ release }: Props) {
           <span className="w-12 text-right text-[9px] uppercase tracking-widest text-muted-foreground/40 shrink-0">
             {release.medium === "physical" ? "physical" : "digital"}
           </span>
-          <OwnerEditPencil release={release} />
           <OwnerNaddrCopy naddr={naddr} />
         </div>
       </div>
