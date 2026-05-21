@@ -1,240 +1,66 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "ndisc release & deletion events — schema v1",
-  "description": "Pinned snapshot (2026-05-22) of the Nostr event schema emitted by ndisc (formerly 'disco-vault') and consumed by the glmps discography viewer. Covers kind:31237 release events and kind:5 (NIP-09) deletion events. IMPORTANT: the addressable d-tag and the kind:5 'a' coordinate both use the legacy 'disco-vault:' prefix, NOT 'ndisc:'. This file pins the CURRENT state — future schema changes should be added as release.v2.json rather than editing this file. Validates fully-signed events as they appear on a relay (id/pubkey/sig required). Spec: JSON Schema draft 2020-12. Note: validating with ajv's optional --strict flag flags the prefixItems tuple-discriminator pattern (strictTuples lint); run ajv without --strict, or with strictTuples:false.",
-  "oneOf": [
-    { "$ref": "#/$defs/releaseEvent" },
-    { "$ref": "#/$defs/deletionEvent" }
-  ],
-  "$defs": {
-    "hex64": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$",
-      "description": "lowercase 32-byte hex (event id / pubkey)"
-    },
-    "hex128": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{128}$",
-      "description": "lowercase 64-byte hex Schnorr signature"
-    },
-    "releaseEvent": {
-      "type": "object",
-      "description": "KIND 31237 — addressable / parameterized-replaceable release event (range 30000-39999). Unique per (pubkey, kind, d-tag). ndisc's own app-specific kind, not a standard NIP kind.",
-      "required": ["id", "pubkey", "created_at", "kind", "tags", "content", "sig"],
-      "additionalProperties": false,
-      "properties": {
-        "id": { "$ref": "#/$defs/hex64" },
-        "pubkey": { "$ref": "#/$defs/hex64" },
-        "created_at": { "type": "integer", "minimum": 0 },
-        "kind": { "const": 31237 },
-        "content": {
-          "type": "string",
-          "description": "release notes — plain text, may be empty"
+  "$comment": "Canonical Nostr wire contract between ndisc (publisher) and the glmps web viewers (consumers). FROZEN — see schema/README.md. Source of truth: xjmzx/ndisc src-tauri/src/lib.rs (release_event / delete_release); the contract test `mod schema_v1` pins ndisc's output to this file.",
+  "schemaVersion": "release.v1",
+  "frozen": true,
+  "canonicalHome": "xjmzx/ndisc — schema/release.v1.json",
+  "kinds": {
+    "release": {
+      "kind": 31237,
+      "class": "addressable / parameterized-replaceable (range 30000-39999)",
+      "addressableBy": ["pubkey", "kind", "d-tag"],
+      "content": "Release notes — plain text. May be an empty string.",
+      "tags": {
+        "d": {
+          "required": true,
+          "format": "disco-vault:<integer release id>",
+          "note": "The ONLY structurally guaranteed tag. The `disco-vault:` prefix is the legacy app name and is frozen — do not change it to `ndisc:`."
         },
-        "sig": { "$ref": "#/$defs/hex128" },
-        "tags": {
-          "type": "array",
-          "description": "Every OPTIONAL tag is omitted entirely when its value is empty. Only d, title and artist are guaranteed present. Unknown/extra tags (e.g. relay or client hints) are tolerated.",
-          "items": { "$ref": "#/$defs/releaseTag" },
-          "allOf": [
-            {
-              "description": "d-tag required — must use the legacy 'disco-vault:' prefix",
-              "contains": { "type": "array", "prefixItems": [ { "const": "d" } ] }
-            },
-            {
-              "description": "title required",
-              "contains": { "type": "array", "prefixItems": [ { "const": "title" } ] }
-            },
-            {
-              "description": "artist required",
-              "contains": { "type": "array", "prefixItems": [ { "const": "artist" } ] }
-            },
-            {
-              "description": "'i' external-id tags (NIP-73) appear 0-2 times",
-              "contains": { "type": "array", "prefixItems": [ { "const": "i" } ] },
-              "minContains": 0,
-              "maxContains": 2
-            }
-          ]
+        "title": { "required": false, "type": "string", "note": "Present unless empty." },
+        "artist": { "required": false, "type": "string", "note": "Present unless empty." },
+        "type": { "required": false, "enum": ["music", "sample", "stem", "field-recording", "message", "other"] },
+        "category": { "required": false, "enum": ["album", "ep", "single", "compilation", "mix", "live", "soundtrack", "bootleg", "miscellaneous"] },
+        "medium": { "required": false, "enum": ["physical", "digital"], "note": "OPTIONAL — frequently absent. Consumers must not require it." },
+        "format": { "required": false, "type": "string" },
+        "year": { "required": false, "type": "string", "note": "Integer rendered as a string." },
+        "label": { "required": false, "type": "string" },
+        "catalog": { "required": false, "type": "string" },
+        "country": { "required": false, "type": "string" },
+        "condition": { "required": false, "type": "string", "note": "Discogs grade verbatim, e.g. 'Near Mint (NM or M-)'." },
+        "source": { "required": false, "type": "string", "note": "URL — emitted only when it is http(s)." },
+        "i": { "required": false, "type": "string", "repeatable": true, "occurrences": "0-2", "format": "discogs:release:<id> | musicbrainz:release:<mbid>", "note": "NIP-73 external content IDs." },
+        "image": { "required": false, "type": "string", "note": "Cover-art URL." }
+      },
+      "rule": "Every tag except `d` is omitted entirely when its value is empty. Consumers MUST require only `d` structurally and treat all other tags — including `title`, `artist`, and `medium` — as optional."
+    },
+    "deletion": {
+      "kind": 5,
+      "spec": "NIP-09",
+      "content": "Empty string.",
+      "tags": {
+        "a": {
+          "required": true,
+          "format": "31237:<author pubkey hex>:disco-vault:<integer release id>",
+          "note": "Addressable coordinate of the deleted release. Authoritative — match this verbatim."
+        },
+        "k": {
+          "required": true,
+          "value": "31237",
+          "note": "Redundant: the kind is already encoded in `a`. Consumers may ignore `k`."
         }
-      }
-    },
-    "releaseTag": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "type": "string" },
-      "description": "A single kind:31237 tag. Known tag names are validated by value; unrecognized names pass through.",
-      "allOf": [
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "d" } ] },
-          "then": {
-            "minItems": 2,
-            "prefixItems": [
-              { "const": "d" },
-              { "type": "string", "pattern": "^disco-vault:.+$", "description": "legacy prefix — NOT 'ndisc:'" }
-            ]
-          }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "title" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "title" }, { "type": "string", "minLength": 1 } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "artist" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "artist" }, { "type": "string", "minLength": 1 } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "type" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "type" }, { "enum": ["music", "sample", "stem", "field-recording", "message", "other"] } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "category" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "category" }, { "enum": ["album", "ep", "single", "compilation", "mix", "live", "soundtrack", "bootleg", "miscellaneous"] } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "medium" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "medium" }, { "enum": ["physical", "digital"] } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "format" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "format" }, { "type": "string", "minLength": 1, "description": "freeform format string" } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "year" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "year" }, { "type": "string", "pattern": "^[0-9]+$", "description": "integer year, encoded as a string" } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "label" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "label" }, { "type": "string", "minLength": 1 } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "catalog" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "catalog" }, { "type": "string", "minLength": 1 } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "country" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "country" }, { "type": "string", "minLength": 1 } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "condition" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "condition" }, { "type": "string", "minLength": 1, "description": "Discogs grade, e.g. 'Near Mint (NM or M-)'" } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "source" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "source" }, { "type": "string", "pattern": "^https?://", "description": "only emitted when http/https" } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "i" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "i" }, { "type": "string", "pattern": "^(discogs:release:|musicbrainz:release:).+$", "description": "NIP-73 external identifier" } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "image" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "image" }, { "type": "string", "pattern": "^https?://", "description": "cover-art URL" } ] }
-        }
-      ]
-    },
-    "deletionEvent": {
-      "type": "object",
-      "description": "KIND 5 — NIP-09 deletion. ndisc deletes a release by publishing kind:5 naming the release's addressable coordinate. Some relays (e.g. Primal) do not enforce kind:5, so consumers MUST apply deletions client-side.",
-      "required": ["id", "pubkey", "created_at", "kind", "tags", "content", "sig"],
-      "additionalProperties": false,
-      "properties": {
-        "id": { "$ref": "#/$defs/hex64" },
-        "pubkey": { "$ref": "#/$defs/hex64" },
-        "created_at": { "type": "integer", "minimum": 0 },
-        "kind": { "const": 5 },
-        "content": { "type": "string", "description": "optional human-readable deletion reason; may be empty" },
-        "sig": { "$ref": "#/$defs/hex128" },
-        "tags": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/deletionTag" },
-          "allOf": [
-            {
-              "description": "at least one 'a' tag naming a kind:31237 'disco-vault:' coordinate (31237:<pubkey>:disco-vault:<identifier>)",
-              "contains": {
-                "type": "array",
-                "prefixItems": [
-                  { "const": "a" },
-                  { "type": "string", "pattern": "^31237:[0-9a-f]{64}:disco-vault:.+$" }
-                ]
-              }
-            },
-            {
-              "description": "'k' tag = '31237'",
-              "contains": {
-                "type": "array",
-                "prefixItems": [ { "const": "k" }, { "const": "31237" } ]
-              }
-            }
-          ]
-        }
-      }
-    },
-    "deletionTag": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "type": "string" },
-      "description": "A single kind:5 tag. ndisc emits 'a' (addressable coordinate) and 'k' (deleted kind); 'e' (event-id) deletes are also accepted.",
-      "allOf": [
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "a" } ] },
-          "then": {
-            "minItems": 2,
-            "prefixItems": [
-              { "const": "a" },
-              { "type": "string", "pattern": "^[0-9]+:[0-9a-f]{64}:" }
-            ]
-          }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "k" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "k" }, { "type": "string", "pattern": "^[0-9]+$" } ] }
-        },
-        {
-          "if": { "type": "array", "prefixItems": [ { "const": "e" } ] },
-          "then": { "minItems": 2, "prefixItems": [ { "const": "e" }, { "$ref": "#/$defs/hex64" } ] }
-        }
-      ]
+      },
+      "rule": "Consumers MUST apply deletions client-side. Some relays (e.g. Primal) do not enforce kind:5, so server-side filtering cannot be relied on."
     }
   },
-  "examples": [
-    {
-      "id": "cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe",
-      "pubkey": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
-      "created_at": 1747900000,
-      "kind": 31237,
-      "content": "Original Belgian pressing, sleeve has light ring wear.",
-      "tags": [
-        ["d", "disco-vault:aphex-twin-selected-ambient-works-85-92"],
-        ["title", "Selected Ambient Works 85-92"],
-        ["artist", "Aphex Twin"],
-        ["type", "music"],
-        ["category", "album"],
-        ["medium", "physical"],
-        ["format", "12\", Comp"],
-        ["year", "1992"],
-        ["label", "Apollo"],
-        ["catalog", "AMB 3922"],
-        ["country", "Belgium"],
-        ["condition", "Near Mint (NM or M-)"],
-        ["source", "https://www.discogs.com/release/12345"],
-        ["i", "discogs:release:12345"],
-        ["i", "musicbrainz:release:0a1b2c3d-4e5f-6789-abcd-ef0123456789"],
-        ["image", "https://image.nostr.build/abc.jpg"]
-      ],
-      "sig": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
-    },
-    {
-      "id": "cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe",
-      "pubkey": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
-      "created_at": 1747900100,
-      "kind": 5,
-      "content": "",
-      "tags": [
-        ["a", "31237:deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef:disco-vault:aphex-twin-selected-ambient-works-85-92"],
-        ["k", "31237"]
-      ],
-      "sig": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+  "consumes": {
+    "profile": {
+      "kind": 0,
+      "direction": "read-only",
+      "note": "ndisc reads the author's kind:0 metadata (name / nip05 / picture) for display. It never publishes kind:0."
     }
-  ]
+  },
+  "naddr": {
+    "spec": "NIP-19 naddr",
+    "coordinate": { "kind": 31237, "pubkey": "<author pubkey>", "identifier": "disco-vault:<integer release id>" }
+  },
+  "changePolicy": "FROZEN. Any change to the emitted event format is a coordinated v2 bump — add release.v2.json and migrate consumers — never an edit to this file."
 }

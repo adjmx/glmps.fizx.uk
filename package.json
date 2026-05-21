@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "schema:check": "bash check-schema-sync.sh",
+    "prebuild": "bash check-schema-sync.sh",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit"
   },
