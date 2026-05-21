@@ -70,36 +70,69 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
     if (!ownerHex) return;
     const pool = poolRef.current!;
 
-    const sub = pool.subscribeMany(
-      relays,
-      { kinds: [7], "#p": [ownerHex] },
-      {
-        onevent(ev) {
-          // Pick the most recent `a` tag pointing at one of our releases.
-          const addr = ev.tags
-            .filter((t) => t[0] === "a" && t[1]?.startsWith(`${RELEASE_KIND}:${ownerHex}:`))
-            .map((t) => t[1])[0];
-          if (!addr) return;
-          let inner = latestRef.current.get(addr);
-          if (!inner) {
-            inner = new Map();
-            latestRef.current.set(addr, inner);
-          }
-          const prev = inner.get(ev.pubkey);
-          // Latest event wins; tie-break to lower id (matches release dedupe).
-          if (
-            !prev ||
-            ev.created_at > prev.created_at ||
-            (ev.created_at === prev.created_at && ev.id < prev.id)
-          ) {
-            inner.set(ev.pubkey, ev);
-            bump();
-          }
-        },
-      },
-    );
+    const onevent = (ev: NostrEvent) => {
+      // Pick the most recent `a` tag pointing at one of our releases.
+      const addr = ev.tags
+        .filter((t) => t[0] === "a" && t[1]?.startsWith(`${RELEASE_KIND}:${ownerHex}:`))
+        .map((t) => t[1])[0];
+      if (!addr) return;
+      let inner = latestRef.current.get(addr);
+      if (!inner) {
+        inner = new Map();
+        latestRef.current.set(addr, inner);
+      }
+      const prev = inner.get(ev.pubkey);
+      // Latest event wins; tie-break to lower id (matches release dedupe).
+      if (
+        !prev ||
+        ev.created_at > prev.created_at ||
+        (ev.created_at === prev.created_at && ev.id < prev.id)
+      ) {
+        inner.set(ev.pubkey, ev);
+        bump();
+      }
+    };
 
-    return () => sub.close();
+    // The kind:7 subscription is best-effort across several relays. If a relay
+    // is slow or fails to connect, its reactions silently never arrive and the
+    // UI shows none. Re-subscribe a few times until the first EOSE so a
+    // transiently unreachable relay still gets queried — re-delivery is
+    // idempotent (events dedupe per (release, reactor) in latestRef).
+    const MAX_ATTEMPTS = 3;
+    const RETRY_MS = 6000;
+    let attempt = 0;
+    let eosed = false;
+    let sub: ReturnType<typeof pool.subscribeMany> | null = null;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const open = () => {
+      attempt += 1;
+      sub = pool.subscribeMany(
+        relays,
+        { kinds: [7], "#p": [ownerHex] },
+        {
+          onevent,
+          oneose() {
+            eosed = true;
+            if (retryTimer) clearTimeout(retryTimer);
+          },
+        },
+      );
+      // No EOSE within RETRY_MS means a relay likely never answered — re-query.
+      if (attempt < MAX_ATTEMPTS) {
+        retryTimer = setTimeout(() => {
+          if (eosed) return;
+          sub?.close();
+          open();
+        }, RETRY_MS);
+      }
+    };
+    open();
+
+    return () => {
+      if (retryTimer) clearTimeout(retryTimer);
+      sub?.close();
+    };
   }, [ownerHex, relays, bump]);
 
   const forAddr = useCallback(
@@ -170,15 +203,27 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
         pubkey: myPubkey,
       });
       if (!event) return;
-      // Optimistic local update so the UI reflects the new state immediately.
       let inner = latestRef.current.get(addr);
       if (!inner) {
         inner = new Map();
         latestRef.current.set(addr, inner);
       }
+      // Optimistic local update; remember the prior state so it can be rolled
+      // back if the event reaches no relay.
+      const prev = inner.get(myPubkey);
       inner.set(myPubkey, event);
       bump();
-      await Promise.allSettled(poolRef.current!.publish(relays, event));
+      const results = await Promise.allSettled(
+        poolRef.current!.publish(relays, event),
+      );
+      if (!results.some((r) => r.status === "fulfilled")) {
+        // No relay accepted the reaction — undo the optimistic update so the
+        // UI never shows a vote that was not persisted.
+        if (prev) inner.set(myPubkey, prev);
+        else inner.delete(myPubkey);
+        bump();
+        throw new Error("reaction not accepted by any relay");
+      }
     },
     [myPubkey, ownerHex, relays, sign, bump],
   );
@@ -188,7 +233,7 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
       if (!myPubkey) return;
       const inner = latestRef.current.get(addr);
       const mine = inner?.get(myPubkey);
-      if (!mine) return;
+      if (!inner || !mine) return;
       const deletion = await sign({
         kind: 5,
         created_at: Math.floor(Date.now() / 1000),
@@ -202,9 +247,18 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
       if (!deletion) return;
       // Drop locally so the UI flips immediately; other clients catch up
       // via the kind:5 we just emitted.
-      inner!.delete(myPubkey);
+      inner.delete(myPubkey);
       bump();
-      await Promise.allSettled(poolRef.current!.publish(relays, deletion));
+      const results = await Promise.allSettled(
+        poolRef.current!.publish(relays, deletion),
+      );
+      if (!results.some((r) => r.status === "fulfilled")) {
+        // The deletion reached no relay — restore the reaction so the UI
+        // matches what every other client will still see.
+        inner.set(myPubkey, mine);
+        bump();
+        throw new Error("reaction removal not accepted by any relay");
+      }
     },
     [myPubkey, relays, sign, bump],
   );

@@ -60,6 +60,10 @@ export default function ReactionButtons({ addr, size = "lg" }: Props) {
         // revoke it — the newer event supersedes it per our latest-wins rule.
         await publish(addr, content);
       }
+    } catch (e) {
+      // publish/revoke roll back their own optimistic state on total failure;
+      // the reverted buttons are the user-facing signal.
+      console.warn("reaction failed", e);
     } finally {
       setBusy(null);
     }
