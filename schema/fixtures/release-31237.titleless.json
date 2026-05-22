@@ -1,0 +1,12 @@
+{
+  "_comment": "kind:31237 release event with NO title and NO artist tag. ndisc's push_tag omits any empty-valued tag, so a release saved with an empty title/artist yields an event carrying ONLY `d`. The v1 `rule` guarantees only `d` structurally — per the frozen contract this event is VALID. parseRelease must NOT drop it; it applies a display fallback (Untitled / Unknown Artist). glmps-authored regression fixture for the title/artist conformance gap.",
+  "kind": 31237,
+  "content": "",
+  "tags": [
+    ["d", "disco-vault:42"]
+  ],
+  "id": "<illustrative — 64-hex event id>",
+  "pubkey": "<illustrative — 64-hex author pubkey>",
+  "created_at": 1747900000,
+  "sig": "<illustrative — 128-hex signature>"
+}

@@ -33,6 +33,14 @@ check("minimal release is not dropped", minimal !== null);
 check("minimal release: medium absent, not required", minimal?.medium === undefined);
 check("minimal release: title + artist parsed", !!minimal?.title && !!minimal?.artist);
 
+// Titleless release — ndisc omits empty-valued tags, so a release saved with
+// no title/artist yields an event carrying ONLY `d`. The v1 `rule` makes this
+// VALID; parseRelease must not drop it and applies a display fallback.
+const titleless = parseRelease(load("release-31237.titleless.json"));
+check("titleless release is not dropped", titleless !== null);
+check("titleless release: title falls back to Untitled", titleless?.title === "Untitled");
+check("titleless release: artist falls back to Unknown Artist", titleless?.artist === "Unknown Artist");
+
 // Full release — every optional tag populated.
 const full = parseRelease(load("release-31237.full.json"));
 check("full release is parsed", full !== null);
