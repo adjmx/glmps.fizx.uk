@@ -64,32 +64,36 @@ export default function Index() {
   const paged = useMemo(() => visible.slice(0, shown), [visible, shown]);
   const hasMore = visible.length > paged.length;
 
+  const labelCount = useMemo(
+    () => new Set(releases.map((r) => r.label).filter(Boolean)).size,
+    [releases],
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Nav />
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
-          {/* Header — hero card: title | relays | discography (single row) */}
-          <div className="bg-card border border-border px-4 py-3 min-h-[110px] flex items-start justify-between gap-5 flex-wrap">
-            <div className="min-w-0 space-y-1">
-              <AnimatedTitle
-                accent="glmps"
-                rest=""
-                from="#34d399"
-                to="#a78bfa"
-                suffixRgba="rgba(52,211,153,0.55)"
-                fontSize="clamp(28px, 5vw, 40px)"
-              />
-              <div className="flex items-center gap-2 text-[10px] font-mono">
-                <span className="text-muted-foreground/70 truncate">Discographies</span>
-                <span className="inline-block rounded-full bg-accent text-accent-foreground font-mono text-[10px] px-2 py-0.5">
-                  Nevent kind 31237
+          {/* Header — hero card: title | relays | discography | labels */}
+          <div className="bg-card border border-border min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_0.96fr_7rem] divide-y sm:divide-y-0 sm:divide-x divide-border">
+            <div className="px-4 py-3 min-w-0 flex flex-col justify-center gap-1">
+              <div className="flex items-start gap-1.5">
+                <AnimatedTitle
+                  accent="glmps"
+                  rest=""
+                  from="#34d399"
+                  to="#a78bfa"
+                  suffixRgba="rgba(52,211,153,0.55)"
+                  fontSize="clamp(28px, 5vw, 40px)"
+                />
+                <span className="mt-2.5 inline-block rounded-full border border-accent text-accent font-mono text-[10px] px-2 py-0.5 shrink-0">
+                  31237
                 </span>
               </div>
             </div>
             {hex && (
-              <div className="font-mono shrink-0">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1.5">
+              <div className="px-4 py-3 flex flex-col gap-1.5 font-mono">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60">
                   relays
                 </div>
                 <RelayStats
@@ -99,7 +103,19 @@ export default function Index() {
               </div>
             )}
             {hex && (
-              <StatsSummary releases={releases} bare className="shrink-0" />
+              <div className="px-4 py-3 flex flex-col">
+                <StatsSummary releases={releases} bare />
+              </div>
+            )}
+            {hex && (
+              <div className="px-4 py-3 flex flex-col gap-1.5 font-mono">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                  labels
+                </div>
+                <div className="text-primary font-semibold text-[12px] tabular-nums">
+                  {labelCount.toLocaleString()}
+                </div>
+              </div>
             )}
           </div>
         </div>

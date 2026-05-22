@@ -68,7 +68,7 @@ export default function RelayStats({
           <div
             key={url}
             title={`${url} — ${statusLabel(status)}${info?.software ? ` · ${info.software.split("/").pop()}${info.version ? ` v${info.version}` : ""}` : ""}`}
-            className="flex items-center gap-2 text-[11px]"
+            className="flex items-center gap-1.5 text-[11px] px-2 py-1 border border-border/60 rounded bg-card/40"
           >
             <span
               className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${statusColor(status)}`}
@@ -96,7 +96,7 @@ export default function RelayStats({
               </span>
             )}
             {readable && (
-              <span className="font-mono text-muted-foreground/60 tabular-nums shrink-0 min-w-[2ch] text-right">
+              <span className="font-mono text-muted-foreground/60 tabular-nums shrink-0 w-[4ch] text-right">
                 {count}
               </span>
             )}

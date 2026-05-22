@@ -85,7 +85,7 @@ function Row({
         {label}
       </span>
       <span
-        className={`tabular-nums ${accent ? "text-primary font-semibold text-[16px]" : "text-accent"}`}
+        className={`tabular-nums ${accent ? "text-primary font-semibold text-[12px]" : "text-accent"}`}
       >
         {n.toLocaleString()}
       </span>
