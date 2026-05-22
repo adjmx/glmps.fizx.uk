@@ -76,7 +76,7 @@ export default function Index() {
         <div className="mb-8">
           {/* Header — hero card: title | relays | discography | labels */}
           <div className="bg-card border border-border min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_0.96fr_7rem] divide-y sm:divide-y-0 sm:divide-x divide-border">
-            <div className="px-4 py-3 min-w-0 flex flex-col justify-center gap-1">
+            <div className="px-4 py-3 min-w-0 flex flex-col">
               <div className="flex items-start gap-1.5">
                 <AnimatedTitle
                   accent="glmps"
