@@ -22,7 +22,7 @@ export default function ReleasePage() {
   return (
     <div className="min-h-screen bg-background">
       <Nav />
-      <main className="container max-w-3xl py-8 sm:py-12">
+      <main className="container max-w-2xl py-6 sm:py-10">
       <div className="mb-6">
         <Link
           to="/"
@@ -59,12 +59,12 @@ export default function ReleasePage() {
 function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) {
   const addr = `${RELEASE_KIND}:${release.pubkey}:${release.d}`;
   return (
-    <article className="space-y-8">
+    <article className="space-y-6">
       <header className="space-y-2">
         <div className="text-[11px] uppercase tracking-widest text-accent">
           {release.artist}
         </div>
-        <h1 className="text-2xl sm:text-4xl font-semibold leading-tight">
+        <h1 className="font-semibold leading-[1.1] text-[clamp(28px,5vw,40px)]">
           {release.title}
         </h1>
         <div className="text-xs sm:text-sm text-muted-foreground">
@@ -86,15 +86,15 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         )}
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_16rem] gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[24rem_16rem] gap-6 items-start">
         {release.image && (
           <img
             src={release.image}
             alt=""
-            className="w-full rounded-lg border border-border"
+            className="w-full max-w-[24rem] rounded-lg border border-border"
           />
         )}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <ReactionSummary addr={addr} />
           {/* Record-label image — placeholder slot; wired to a nostr.build URL later. */}
           <div className="w-full aspect-square rounded-lg border border-border/60 bg-card/30 flex items-center justify-center">
@@ -109,7 +109,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         </div>
       )}
 
-      <dl className="grid grid-cols-1 lg:grid-cols-[1fr_16rem] gap-x-8 gap-y-3 text-sm">
+      <dl className="grid grid-cols-1 lg:grid-cols-[24rem_16rem] gap-x-6 gap-y-3 text-sm">
         <Field label="type" value={release.type} />
         <Field label="category" value={release.category} />
         <Field label="medium" value={release.medium} />
