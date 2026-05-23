@@ -42,13 +42,11 @@ export function useLabelLibrary() {
 
     const sub = pool.subscribeMany(
       relays,
-      [
-        {
-          kinds: [LABEL_LIBRARY_KIND],
-          authors: [ownerHex],
-          "#d": [LABEL_LIBRARY_D],
-        },
-      ],
+      {
+        kinds: [LABEL_LIBRARY_KIND],
+        authors: [ownerHex],
+        "#d": [LABEL_LIBRARY_D],
+      },
       {
         onevent(ev) {
           if (!isNewerReplaceable(latest, ev)) return;
