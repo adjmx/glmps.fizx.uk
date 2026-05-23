@@ -4,6 +4,7 @@ import Nav from "@/components/Nav";
 import ReactionSummary from "@/components/ReactionSummary";
 import { hostnameOf, naddrDecode, type Release } from "@/lib/nostr";
 import { useReleaseByAddr } from "@/hooks/useReleaseByAddr";
+import { useLabelLibrary, imageForLabel } from "@/hooks/useLabelLibrary";
 import { RELEASE_KIND } from "@/config";
 
 export default function ReleasePage() {
@@ -96,10 +97,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         )}
         <div className="space-y-3">
           <ReactionSummary addr={addr} />
-          {/* Record-label image — placeholder slot; wired to a nostr.build URL later. */}
-          <div className="w-full aspect-square rounded-lg border border-border/60 bg-card/30 flex items-center justify-center">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/40">label</span>
-          </div>
+          <LabelSlot label={release.label} />
         </div>
       </div>
 
@@ -156,6 +154,35 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         naddr: {naddr}
       </div>
     </article>
+  );
+}
+
+/**
+ * Square card under the reactions panel. Renders the record-label image
+ * looked up from the owner's labels.v1 manifest (kind:31238) by release.label.
+ * Falls back to a generic glyph when the label is unmapped or the manifest
+ * doesn't exist yet (ndisc publisher impl pending — see schema/labels.v1.json).
+ */
+function LabelSlot({ label }: { label?: string }) {
+  const { library } = useLabelLibrary();
+  const url = imageForLabel(library, label);
+  return (
+    <div className="w-full aspect-square rounded-lg border border-border/60 bg-card/30 flex items-center justify-center overflow-hidden">
+      {url ? (
+        <img
+          src={url}
+          alt={label}
+          className="w-full h-full object-contain"
+        />
+      ) : (
+        <img
+          src="/icons/label-fallback.svg"
+          alt=""
+          aria-hidden
+          className="w-1/3 h-1/3 opacity-40"
+        />
+      )}
+    </div>
   );
 }
 

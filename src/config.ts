@@ -8,3 +8,4 @@ export const DEFAULT_RELAYS = [
 ] as const;
 
 export const RELEASE_KIND = 31237;
+export const LABEL_LIBRARY_KIND = 31238;

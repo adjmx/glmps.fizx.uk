@@ -195,6 +195,42 @@ export function parseProfile(event: NostrEvent): Profile {
   }
 }
 
+/** Entry in the owner's record-label image library (labels.v1). */
+export type LabelLibraryEntry = {
+  image: string;
+};
+
+/**
+ * Owner-published record-label image library. Single addressable event per
+ * author at LABEL_LIBRARY_KIND with d-tag "disco-vault:labels". Wire schema:
+ * schema/labels.v1.json. Currently UNFROZEN — pending ndisc publisher impl.
+ */
+export type LabelLibrary = {
+  schemaVersion: "labels.v1";
+  labels: Record<string, LabelLibraryEntry>;
+};
+
+export function parseLabelLibrary(event: NostrEvent): LabelLibrary | null {
+  try {
+    const parsed = JSON.parse(event.content);
+    if (parsed?.schemaVersion !== "labels.v1") return null;
+    if (!parsed.labels || typeof parsed.labels !== "object") return null;
+    const labels: Record<string, LabelLibraryEntry> = {};
+    for (const [name, entry] of Object.entries(parsed.labels)) {
+      if (
+        entry &&
+        typeof entry === "object" &&
+        typeof (entry as { image?: unknown }).image === "string"
+      ) {
+        labels[name] = { image: (entry as { image: string }).image };
+      }
+    }
+    return { schemaVersion: "labels.v1", labels };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * NIP-01 replaceable winner rule: higher created_at wins; tie-break to lower
  * lexicographic event id. Returns true iff `next` should replace `current`.
