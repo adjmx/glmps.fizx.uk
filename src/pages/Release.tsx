@@ -86,15 +86,22 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         )}
       </header>
 
-      {release.image && (
-        <img
-          src={release.image}
-          alt=""
-          className="w-full max-w-xs sm:max-w-sm rounded-lg border border-border"
-        />
-      )}
-
-      <ReactionSummary addr={addr} />
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_16rem] gap-8 items-start">
+        {release.image && (
+          <img
+            src={release.image}
+            alt=""
+            className="w-full rounded-lg border border-border"
+          />
+        )}
+        <div className="space-y-4">
+          <ReactionSummary addr={addr} />
+          {/* Record-label image — placeholder slot; wired to a nostr.build URL later. */}
+          <div className="w-full aspect-square rounded-lg border border-border/60 bg-card/30 flex items-center justify-center">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/40">label</span>
+          </div>
+        </div>
+      </div>
 
       {release.notes && (
         <div className="text-sm whitespace-pre-wrap leading-relaxed text-foreground/90 max-w-prose">
@@ -102,7 +109,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         </div>
       )}
 
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+      <dl className="grid grid-cols-1 lg:grid-cols-[1fr_16rem] gap-x-8 gap-y-3 text-sm">
         <Field label="type" value={release.type} />
         <Field label="category" value={release.category} />
         <Field label="medium" value={release.medium} />

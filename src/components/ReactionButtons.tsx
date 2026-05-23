@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
-import { usePopover } from "@/hooks/usePopover";
 import {
   useReactions,
   REACTION_UP,
   REACTION_DOWN,
-  REACTION_INFO,
 } from "@/hooks/useReactions";
 import { useNostrLogin } from "@/hooks/useNostrLogin";
 import { classifyReaction } from "@/lib/rating";
-import InfoPopover from "./InfoPopover";
 
 type Props = {
   addr: string;
@@ -20,15 +17,14 @@ type Props = {
 export default function ReactionButtons({ addr, size = "lg" }: Props) {
   const { pubkey } = useNostrLogin();
   const { forAddr, publish, revoke, canPublish } = useReactions();
-  const { up, down, info, myReaction } = forAddr(addr);
+  const { up, down, myReaction } = forAddr(addr);
   const myKind = myReaction ? classifyReaction(myReaction.content) : null;
-  const infoPop = usePopover<HTMLDivElement>();
-  const [busy, setBusy] = useState<null | "up" | "down" | "info">(null);
+  const [busy, setBusy] = useState<null | "up" | "down">(null);
 
   if (!pubkey) {
     return (
       <div className="text-[11px] font-mono text-muted-foreground/60">
-        log in to vote · {up}↑ · {down}↓ · {info} info
+        log in to vote · {up}↑ · {down}↓
       </div>
     );
   }
@@ -41,16 +37,11 @@ export default function ReactionButtons({ addr, size = "lg" }: Props) {
     );
   }
 
-  const click = async (kind: "up" | "down" | "info") => {
+  const click = async (kind: "up" | "down") => {
     if (busy) return;
     setBusy(kind);
     try {
-      const content =
-        kind === "up"
-          ? REACTION_UP
-          : kind === "down"
-            ? REACTION_DOWN
-            : REACTION_INFO;
+      const content = kind === "up" ? REACTION_UP : REACTION_DOWN;
       if (myKind === kind) {
         // Same button clicked twice → revoke via kind:5 deletion.
         await revoke(addr);
@@ -110,35 +101,6 @@ export default function ReactionButtons({ addr, size = "lg" }: Props) {
         <span aria-hidden>↓</span>
         <span>{down}</span>
       </button>
-      <div ref={infoPop.ref} className="relative">
-        <button
-          type="button"
-          disabled={busy !== null}
-          onClick={async () => {
-            // Open the popover immediately for UX; publish/revoke in parallel.
-            if (!infoPop.open) infoPop.toggle();
-            await click("info");
-          }}
-          aria-pressed={myKind === "info"}
-          aria-expanded={infoPop.open}
-          className={cn(
-            "font-mono inline-flex items-center rounded border transition-colors",
-            btnBase,
-            myKind === "info"
-              ? "border-primary text-primary bg-primary/10"
-              : "border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40",
-            busy === "info" && "opacity-50",
-          )}
-        >
-          <span aria-hidden>+ info</span>
-          <span>{info}</span>
-        </button>
-        {infoPop.open && (
-          <div className="absolute z-30 mt-1 right-0 rounded-md border border-border bg-card shadow-lg p-3">
-            <InfoPopover />
-          </div>
-        )}
-      </div>
     </div>
   );
 }
