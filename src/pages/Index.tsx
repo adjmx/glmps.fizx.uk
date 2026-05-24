@@ -7,7 +7,9 @@ import ReleaseRow from "@/components/ReleaseRow";
 import FilterBar from "@/components/FilterBar";
 import ViewToggle, { type ViewMode } from "@/components/ViewToggle";
 import RelayStats from "@/components/RelayStats";
+import LabelCycler from "@/components/LabelCycler";
 import { useReleases } from "@/hooks/useReleases";
+import { useLabelLibrary } from "@/hooks/useLabelLibrary";
 import { DEFAULT_RELAYS, OWNER_NPUB, RELEASE_KIND } from "@/config";
 import {
   applyFilters,
@@ -29,6 +31,7 @@ export default function Index() {
   }, []);
 
   const { releases, loading, eose } = useReleases(hex);
+  const { library } = useLabelLibrary();
 
   const [filters, setFilters] = useState<FilterState>(emptyFilters);
   const [view, setView] = useState<ViewMode>(() => {
@@ -69,13 +72,32 @@ export default function Index() {
     [releases],
   );
 
+  // Single-select sync for the FilterBar.label set. Clicking the hero
+  // LabelCycler single-selects that label; clicking the same one again
+  // (or while it's the sole filter) clears it.
+  const activeLabel = useMemo(() => {
+    if (filters.label.size !== 1) return undefined;
+    const [only] = filters.label;
+    return only;
+  }, [filters.label]);
+
+  const handleLabelClick = (name: string) => {
+    setFilters((prev) => {
+      const onlyOne = prev.label.size === 1 && prev.label.has(name);
+      return {
+        ...prev,
+        label: onlyOne ? new Set<string>() : new Set([name]),
+      };
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Nav />
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
           {/* Header — hero card: title | relays | discography | labels */}
-          <div className="bg-card border border-border min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_0.96fr_7rem] divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <div className="bg-card border border-border min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_0.92fr_9rem] divide-y sm:divide-y-0 sm:divide-x divide-border">
             <div className="px-4 py-3 min-w-0 flex flex-col">
               <div className="flex items-start gap-1.5">
                 <AnimatedTitle
@@ -115,6 +137,12 @@ export default function Index() {
                 <div className="text-primary font-semibold text-[12px] tabular-nums">
                   {labelCount.toLocaleString()}
                 </div>
+                <LabelCycler
+                  releases={releases}
+                  library={library}
+                  activeLabel={activeLabel}
+                  onLabelClick={handleLabelClick}
+                />
               </div>
             )}
           </div>
