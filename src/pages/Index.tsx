@@ -126,10 +126,7 @@ export default function Index() {
               </div>
             </div>
             {hex && (
-              <div className="px-4 py-3 flex flex-col gap-1.5 font-mono">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                  relays
-                </div>
+              <div className="px-4 py-3 font-mono">
                 <RelayStats
                   urls={DEFAULT_RELAYS}
                   filter={{ kinds: [RELEASE_KIND], authors: [hex] }}

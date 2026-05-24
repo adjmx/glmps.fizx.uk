@@ -23,9 +23,6 @@ export default function StatsSummary({ releases, className = "", bare = false }:
     <div
       className={`${bare ? "font-mono" : "rounded-lg border border-border/60 bg-card/30 p-3 font-mono"} ${className}`}
     >
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">
-        discography
-      </div>
       <div className="space-y-1.5 text-[12px]">
         <Row
           label={stats.total === 1 ? "release" : "releases"}
