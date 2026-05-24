@@ -27,17 +27,17 @@ export default function StatsSummary({ releases, className = "", bare = false }:
         <Row
           label={stats.total === 1 ? "release" : "releases"}
           n={stats.total}
-          accent
+          valueClass="text-primary"
         />
         <Row
           label={stats.artists === 1 ? "artist" : "artists"}
           n={stats.artists}
-          accent
+          valueClass="text-accent"
         />
         <Row
           label={stats.labels === 1 ? "label" : "labels"}
           n={stats.labels}
-          accent
+          valueClass="text-foreground"
         />
       </div>
     </div>
@@ -47,21 +47,21 @@ export default function StatsSummary({ releases, className = "", bare = false }:
 function Row({
   label,
   n,
-  accent,
+  valueClass,
   title,
 }: {
   label: string;
   n: number;
-  accent?: boolean;
+  valueClass?: string;
   title?: string;
 }) {
   return (
-    <div className="flex justify-between items-baseline gap-4" title={title}>
-      <span className={accent ? "text-foreground/90" : "text-foreground/70"}>
-        {label}
-      </span>
+    <div className="flex items-baseline gap-3" title={title}>
+      <span className="w-20 text-foreground/70">{label}</span>
       <span
-        className={`tabular-nums ${accent ? "text-primary font-semibold text-[12px]" : "text-accent"}`}
+        className={`tabular-nums font-bold tracking-tight text-[18px] ${
+          valueClass ?? "text-primary"
+        }`}
       >
         {n.toLocaleString()}
       </span>
