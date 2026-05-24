@@ -97,7 +97,7 @@ export default function LabelCycler({
         >
           {current.name}
         </span>
-        <span className="shrink-0 tabular-nums text-muted-foreground/40">
+        <span className="shrink-0 tabular-nums text-muted-foreground/60">
           {current.count}
         </span>
       </div>
