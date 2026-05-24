@@ -67,10 +67,14 @@ export default function Index() {
   const paged = useMemo(() => visible.slice(0, shown), [visible, shown]);
   const hasMore = visible.length > paged.length;
 
-  const labelCount = useMemo(
-    () => new Set(releases.map((r) => r.label).filter(Boolean)).size,
-    [releases],
-  );
+  // Gate the labels cell on whether the manifest will populate the
+  // cycler. Until ndisc publishes labels.v1, this is false and the hero
+  // collapses to 3 columns. (The `labels` count itself moved into
+  // StatsSummary, so we don't keep a separate count here anymore.)
+  const hasLabelImages = useMemo(() => {
+    if (!library) return false;
+    return releases.some((r) => r.label && library.labels[r.label]);
+  }, [releases, library]);
 
   // Single-select sync for the FilterBar.label set. Clicking the hero
   // LabelCycler single-selects that label; clicking the same one again
@@ -97,7 +101,13 @@ export default function Index() {
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
           {/* Header — hero card: title | relays | discography | labels */}
-          <div className="bg-card border border-border min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_16rem_13rem] divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <div
+            className={`bg-card border border-border min-h-[110px] grid grid-cols-1 ${
+              hasLabelImages
+                ? "sm:grid-cols-[auto_1fr_16rem_13rem]"
+                : "sm:grid-cols-[auto_1fr_16rem]"
+            } divide-y sm:divide-y-0 sm:divide-x divide-border`}
+          >
             <div className="px-4 py-3 min-w-0 flex flex-col">
               <div className="flex items-start gap-1.5">
                 <AnimatedTitle
@@ -129,14 +139,8 @@ export default function Index() {
                 <StatsSummary releases={releases} bare />
               </div>
             )}
-            {hex && (
-              <div className="px-4 py-3 flex flex-col gap-1.5 font-mono">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                  labels
-                </div>
-                <div className="text-primary font-semibold text-[12px] tabular-nums">
-                  {labelCount.toLocaleString()}
-                </div>
+            {hex && hasLabelImages && (
+              <div className="px-4 py-3 font-mono">
                 <LabelCycler
                   releases={releases}
                   library={library}

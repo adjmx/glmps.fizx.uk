@@ -68,7 +68,7 @@ export default function LabelCycler({
 
   return (
     <div
-      className="mt-1 flex flex-col gap-1"
+      className="flex flex-col gap-1"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

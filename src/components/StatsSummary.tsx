@@ -14,7 +14,9 @@ export default function StatsSummary({ releases, className = "", bare = false }:
     const by = (cat: string) =>
       releases.filter((r) => r.category === cat).length;
     return {
+      artists: new Set(releases.map((r) => r.artist).filter(Boolean)).size,
       total: releases.length,
+      labels: new Set(releases.map((r) => r.label).filter(Boolean)).size,
       album: by("album"),
       ep: by("ep"),
       single: by("single"),
@@ -39,9 +41,17 @@ export default function StatsSummary({ releases, className = "", bare = false }:
       </div>
       <div className="space-y-1.5 text-[12px]">
         <Row
+          label={stats.artists === 1 ? "artist" : "artists"}
+          n={stats.artists}
+        />
+        <Row
           label={stats.total === 1 ? "release" : "releases"}
           n={stats.total}
           accent
+        />
+        <Row
+          label={stats.labels === 1 ? "label" : "labels"}
+          n={stats.labels}
         />
         {hasSubcats && (
           <div className="mt-1.5 pt-1.5 border-t border-border/40 space-y-1">
