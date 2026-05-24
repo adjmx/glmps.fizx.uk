@@ -63,7 +63,7 @@ function Row({
           valueClass ?? "text-primary"
         }`}
       >
-        {n.toLocaleString()}
+        {n}
       </span>
     </div>
   );
