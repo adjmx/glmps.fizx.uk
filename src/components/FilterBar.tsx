@@ -73,6 +73,7 @@ export default function FilterBar({ releases, value, onChange }: Props) {
     const typeSet = new Set<string>();
     const categorySet = new Set<string>();
     const conditionSet = new Set<string>();
+    const countrySet = new Set<string>();
     const labelCounts = new Map<string, number>();
     let noLabelCount = 0;
     for (const r of releases) {
@@ -81,6 +82,7 @@ export default function FilterBar({ releases, value, onChange }: Props) {
       if (r.type) typeSet.add(r.type);
       if (r.category) categorySet.add(r.category);
       if (r.condition) conditionSet.add(r.condition);
+      if (r.country) countrySet.add(r.country);
       const d = decadeOf(r.year);
       if (d) decadeSet.add(d);
       for (const t of r.tags) genreSet.add(t);
@@ -137,6 +139,7 @@ export default function FilterBar({ releases, value, onChange }: Props) {
           .filter((v) => !CONDITION_ORDER.includes(v))
           .sort(),
       ],
+      country: Array.from(countrySet).sort(),
       label: labelDefault,
       labelSearchable,
     };
@@ -153,7 +156,8 @@ export default function FilterBar({ releases, value, onChange }: Props) {
     | "type"
     | "category"
     | "condition"
-    | "label";
+    | "label"
+    | "country";
 
   const removeChip = (facet: Facet, v: string) => {
     const next = new Set(value[facet]);
@@ -172,6 +176,7 @@ export default function FilterBar({ releases, value, onChange }: Props) {
       category: new Set(),
       condition: new Set(),
       label: new Set(),
+      country: new Set(),
     });
 
   const chips: Array<{ facet: Facet; value: string }> = [
@@ -185,6 +190,10 @@ export default function FilterBar({ releases, value, onChange }: Props) {
     ...Array.from(value.decade).map((v) => ({ facet: "decade" as const, value: v })),
     ...Array.from(value.genre).map((v) => ({ facet: "genre" as const, value: v })),
     ...Array.from(value.label).map((v) => ({ facet: "label" as const, value: v })),
+    ...Array.from(value.country).map((v) => ({
+      facet: "country" as const,
+      value: v,
+    })),
     ...Array.from(value.condition).map((v) => ({
       facet: "condition" as const,
       value: v,
@@ -243,6 +252,14 @@ export default function FilterBar({ releases, value, onChange }: Props) {
             searchableOptions={options.labelSearchable}
             selected={value.label}
             onChange={(next) => set("label", next)}
+          />
+        )}
+        {options.country.length > 0 && (
+          <FacetButton
+            label="country"
+            options={options.country}
+            selected={value.country}
+            onChange={(next) => set("country", next)}
           />
         )}
         {options.condition.length > 0 && (

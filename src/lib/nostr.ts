@@ -294,6 +294,7 @@ export type FilterState = {
   category: Set<string>;
   condition: Set<string>;
   label: Set<string>;
+  country: Set<string>;
 };
 
 // Sentinel option for releases that have no label tag. Rendered as-is in the
@@ -311,6 +312,7 @@ export function emptyFilters(): FilterState {
     category: new Set(),
     condition: new Set(),
     label: new Set(),
+    country: new Set(),
   };
 }
 
@@ -324,7 +326,8 @@ export function isAnyFilterActive(f: FilterState): boolean {
     f.type.size > 0 ||
     f.category.size > 0 ||
     f.condition.size > 0 ||
-    f.label.size > 0
+    f.label.size > 0 ||
+    f.country.size > 0
   );
 }
 
@@ -398,6 +401,8 @@ export function applyFilters(releases: Release[], f: FilterState): Release[] {
         : f.label.has(NO_LABEL_SENTINEL);
       if (!labelMatch) return false;
     }
+    if (f.country.size > 0 && (!r.country || !f.country.has(r.country)))
+      return false;
     if (f.decade.size > 0) {
       const d = decadeOf(r.year);
       if (!d || !f.decade.has(d)) return false;
