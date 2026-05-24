@@ -28,13 +28,13 @@ export default function StatsSummary({ releases, className = "", bare = false }:
       </div>
       <div className="space-y-1.5 text-[12px]">
         <Row
-          label={stats.artists === 1 ? "artist" : "artists"}
-          n={stats.artists}
+          label={stats.total === 1 ? "release" : "releases"}
+          n={stats.total}
           accent
         />
         <Row
-          label={stats.total === 1 ? "release" : "releases"}
-          n={stats.total}
+          label={stats.artists === 1 ? "artist" : "artists"}
+          n={stats.artists}
           accent
         />
         <Row
