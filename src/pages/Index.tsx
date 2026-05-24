@@ -106,8 +106,8 @@ export default function Index() {
             <div
               className={`min-h-[110px] grid grid-cols-1 ${
                 hasLabelImages
-                  ? "sm:grid-cols-[auto_1fr_16rem_13rem]"
-                  : "sm:grid-cols-[auto_1fr_16rem]"
+                  ? "sm:grid-cols-[auto_1fr_13rem_15rem]"
+                  : "sm:grid-cols-[auto_1fr_13rem]"
               } divide-y sm:divide-y-0 sm:divide-x divide-border`}
             >
               <div className="px-4 py-3 min-w-0 flex flex-col">
