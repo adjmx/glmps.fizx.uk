@@ -97,7 +97,7 @@ export default function Index() {
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
           {/* Header — hero card: title | relays | discography | labels */}
-          <div className="bg-card border border-border min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_0.92fr_9rem] divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <div className="bg-card border border-border min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_16rem_13rem] divide-y sm:divide-y-0 sm:divide-x divide-border">
             <div className="px-4 py-3 min-w-0 flex flex-col">
               <div className="flex items-start gap-1.5">
                 <AnimatedTitle
