@@ -102,14 +102,15 @@ export default function Index() {
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
           {/* Header — hero card: title | relays | discography | labels */}
-          <div
-            className={`bg-card border border-border min-h-[110px] grid grid-cols-1 ${
-              hasLabelImages
-                ? "sm:grid-cols-[auto_1fr_16rem_13rem]"
-                : "sm:grid-cols-[auto_1fr_16rem]"
-            } divide-y sm:divide-y-0 sm:divide-x divide-border`}
-          >
-            <div className="px-4 py-3 min-w-0 flex flex-col gap-2">
+          <div className="bg-card border border-border">
+            <div
+              className={`min-h-[110px] grid grid-cols-1 ${
+                hasLabelImages
+                  ? "sm:grid-cols-[auto_1fr_16rem_13rem]"
+                  : "sm:grid-cols-[auto_1fr_16rem]"
+              } divide-y sm:divide-y-0 sm:divide-x divide-border`}
+            >
+              <div className="px-4 py-3 min-w-0 flex flex-col">
               <div className="flex items-start gap-1.5">
                 <AnimatedTitle
                   accent="glmps"
@@ -123,10 +124,6 @@ export default function Index() {
                   31237
                 </span>
               </div>
-              <SearchInput
-                value={filters.search}
-                onChange={(v) => setFilters((prev) => ({ ...prev, search: v }))}
-              />
             </div>
             {hex && (
               <div className="px-4 py-3 flex flex-col gap-1.5 font-mono">
@@ -154,6 +151,14 @@ export default function Index() {
                 />
               </div>
             )}
+            </div>
+            <div className="border-t border-border px-4 py-3">
+              <SearchInput
+                value={filters.search}
+                onChange={(v) => setFilters((prev) => ({ ...prev, search: v }))}
+                className="max-w-[24rem]"
+              />
+            </div>
           </div>
         </div>
 
