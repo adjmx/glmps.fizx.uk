@@ -43,6 +43,7 @@ export default function StatsSummary({ releases, className = "", bare = false }:
         <Row
           label={stats.artists === 1 ? "artist" : "artists"}
           n={stats.artists}
+          accent
         />
         <Row
           label={stats.total === 1 ? "release" : "releases"}
@@ -52,6 +53,7 @@ export default function StatsSummary({ releases, className = "", bare = false }:
         <Row
           label={stats.labels === 1 ? "label" : "labels"}
           n={stats.labels}
+          accent
         />
         {hasSubcats && (
           <div className="mt-1.5 pt-1.5 border-t border-border/40 space-y-1">
