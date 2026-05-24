@@ -10,27 +10,14 @@ type Props = {
 };
 
 export default function StatsSummary({ releases, className = "", bare = false }: Props) {
-  const stats = useMemo(() => {
-    const by = (cat: string) =>
-      releases.filter((r) => r.category === cat).length;
-    return {
+  const stats = useMemo(
+    () => ({
       artists: new Set(releases.map((r) => r.artist).filter(Boolean)).size,
       total: releases.length,
       labels: new Set(releases.map((r) => r.label).filter(Boolean)).size,
-      album: by("album"),
-      ep: by("ep"),
-      single: by("single"),
-      // misc = every categorised release that isn't album/ep/single
-      // (compilation, mix, live, soundtrack, bootleg, miscellaneous, …).
-      // Excludes uncategorised releases (no category tag).
-      misc: releases.filter(
-        (r) => r.category && !["album", "ep", "single"].includes(r.category),
-      ).length,
-    };
-  }, [releases]);
-
-  const hasSubcats =
-    stats.album > 0 || stats.ep > 0 || stats.single > 0 || stats.misc > 0;
+    }),
+    [releases],
+  );
 
   return (
     <div
@@ -55,26 +42,6 @@ export default function StatsSummary({ releases, className = "", bare = false }:
           n={stats.labels}
           accent
         />
-        {hasSubcats && (
-          <div className="mt-1.5 pt-1.5 border-t border-border/40 space-y-1">
-            {stats.album > 0 && (
-              <Row
-                label={stats.album === 1 ? "album" : "albums"}
-                n={stats.album}
-              />
-            )}
-            {(stats.ep > 0 || stats.single > 0) && (
-              <Row label="eps & singles" n={stats.ep + stats.single} />
-            )}
-            {stats.misc > 0 && (
-              <Row
-                label="comps, mixes, live…"
-                n={stats.misc}
-                title="compilations, mixes, live, soundtracks, bootlegs & miscellaneous"
-              />
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
