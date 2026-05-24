@@ -67,30 +67,28 @@ export default function LabelCycler({
   const isActive = activeLabel === current.name;
 
   return (
-    <div
-      className="flex flex-col gap-1"
+    <button
+      type="button"
+      onClick={() => onLabelClick(current.name)}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      className={`block w-full text-left rounded-lg border bg-card/30 overflow-hidden transition-colors font-mono ${
+        isActive
+          ? "border-primary"
+          : "border-border hover:border-primary/40"
+      }`}
+      title={isActive ? `Clear ${current.name} filter` : `Filter by ${current.name}`}
+      aria-label={`Filter releases by label ${current.name}`}
     >
-      <button
-        type="button"
-        onClick={() => onLabelClick(current.name)}
-        className={`w-full aspect-square rounded border bg-card/30 overflow-hidden transition-colors ${
-          isActive
-            ? "border-primary"
-            : "border-border/60 hover:border-primary/60"
-        }`}
-        title={isActive ? `Clear ${current.name} filter` : `Filter by ${current.name}`}
-        aria-label={`Filter releases by label ${current.name}`}
-      >
+      <div className="aspect-square">
         <img
           key={current.name}
           src={current.image}
           alt={current.name}
           className="w-full h-full object-contain animate-in fade-in duration-700"
         />
-      </button>
-      <div className="flex items-center justify-between gap-1 text-[9px]">
+      </div>
+      <div className="px-2 py-1 flex items-center justify-between gap-1 text-[9px]">
         <span
           className={`truncate ${isActive ? "text-primary" : "text-foreground/70"}`}
           title={current.name}
@@ -101,6 +99,6 @@ export default function LabelCycler({
           {current.count}
         </span>
       </div>
-    </div>
+    </button>
   );
 }
