@@ -69,7 +69,9 @@ export default function FacetButton({
         <span className="uppercase tracking-widest opacity-60 text-[10px]">
           {label}
         </span>
-        <span className="truncate">{summary}</span>
+        {selected.size > 0 && (
+          <span className="truncate">{summary}</span>
+        )}
         <svg
           className={cn(
             "h-3 w-3 shrink-0 opacity-50 transition-transform",
