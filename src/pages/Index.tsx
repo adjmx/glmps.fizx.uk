@@ -8,6 +8,7 @@ import FilterBar from "@/components/FilterBar";
 import ViewToggle, { type ViewMode } from "@/components/ViewToggle";
 import RelayStats from "@/components/RelayStats";
 import LabelCycler from "@/components/LabelCycler";
+import SearchInput from "@/components/SearchInput";
 import { useReleases } from "@/hooks/useReleases";
 import { useLabelLibrary } from "@/hooks/useLabelLibrary";
 import { DEFAULT_RELAYS, OWNER_NPUB, RELEASE_KIND } from "@/config";
@@ -108,7 +109,7 @@ export default function Index() {
                 : "sm:grid-cols-[auto_1fr_16rem]"
             } divide-y sm:divide-y-0 sm:divide-x divide-border`}
           >
-            <div className="px-4 py-3 min-w-0 flex flex-col">
+            <div className="px-4 py-3 min-w-0 flex flex-col gap-2">
               <div className="flex items-start gap-1.5">
                 <AnimatedTitle
                   accent="glmps"
@@ -122,6 +123,10 @@ export default function Index() {
                   31237
                 </span>
               </div>
+              <SearchInput
+                value={filters.search}
+                onChange={(v) => setFilters((prev) => ({ ...prev, search: v }))}
+              />
             </div>
             {hex && (
               <div className="px-4 py-3 flex flex-col gap-1.5 font-mono">

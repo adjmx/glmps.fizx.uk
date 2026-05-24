@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import FacetButton from "./FacetButton";
-import { cn } from "@/lib/cn";
 import {
   FORMAT_GROUP_ORDER,
   NO_LABEL_SENTINEL,
@@ -195,10 +194,6 @@ export default function FilterBar({ releases, value, onChange }: Props) {
   return (
     <div className="mb-6">
       <div className="flex flex-wrap items-center gap-2">
-        <SearchInput
-          value={value.search}
-          onChange={(v) => set("search", v)}
-        />
         {options.type.length > 0 && (
           <FacetButton
             label="type"
@@ -301,36 +296,3 @@ export default function FilterBar({ releases, value, onChange }: Props) {
   );
 }
 
-function SearchInput({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="relative flex-1 min-w-[10rem] max-w-[16rem]">
-      <svg
-        className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 opacity-40 pointer-events-none"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-      >
-        <circle cx="7" cy="7" r="5" />
-        <path d="M10.5 10.5L14 14" strokeLinecap="round" />
-      </svg>
-      <input
-        type="search"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="search title, artist, notes…"
-        className={cn(
-          "w-full font-mono text-[11px] pl-7 pr-2 py-1 rounded border bg-card",
-          "border-border focus:border-primary/50 focus:outline-none",
-          "placeholder:text-muted-foreground/40",
-        )}
-      />
-    </div>
-  );
-}
