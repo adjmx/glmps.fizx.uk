@@ -106,7 +106,7 @@ export default function Index() {
             <div
               className={`min-h-[110px] grid grid-cols-1 ${
                 hasLabelImages
-                  ? "sm:grid-cols-[auto_1fr_13rem_15rem]"
+                  ? "sm:grid-cols-[auto_1fr_13rem_12rem]"
                   : "sm:grid-cols-[auto_1fr_13rem]"
               } divide-y sm:divide-y-0 sm:divide-x divide-border`}
             >
