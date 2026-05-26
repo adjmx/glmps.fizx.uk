@@ -59,7 +59,7 @@ function Row({
     <div className="flex items-baseline gap-3" title={title}>
       <span className="w-20 text-foreground/70">{label}</span>
       <span
-        className={`tabular-nums font-bold tracking-tight text-[18px] ${
+        className={`font-sans tabular-nums font-bold tracking-tight text-[18px] ${
           valueClass ?? "text-primary"
         }`}
       >
