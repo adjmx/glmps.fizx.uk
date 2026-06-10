@@ -1,5 +1,6 @@
 import type { Event as NostrEvent } from "nostr-tools";
 import { nip19 } from "nostr-tools";
+import { type GenreSlug, normaliseGenres } from "./genre";
 
 export type Release = {
   id: string;
@@ -21,6 +22,13 @@ export type Release = {
   source?: string; // outbound http(s) URL: Discogs release, Bandcamp, label store, etc.
   externalIds: string[];
   tags: string[];
+  /**
+   * release.v2 — ordered 0–3 genre slots. Slot 0 = primary, slot 1 = secondary,
+   * slot 2 = tertiary. Normalised on parse: unknown slugs dropped, duplicates
+   * removed, `electronic` removed when any electronic sub is present.
+   * v1 events parse to `[]` (no `genre` tags emitted).
+   */
+  genres: GenreSlug[];
   image?: string;
   notes: string;
   event: NostrEvent;
@@ -180,6 +188,7 @@ export function parseRelease(event: NostrEvent): Release | null {
     source: sourceUrlOf(getTag(event, "source")),
     externalIds: getAllTags(event, "i"),
     tags: getAllTags(event, "t"),
+    genres: normaliseGenres(getAllTags(event, "genre")),
     image: getTag(event, "image"),
     notes: event.content,
     event,
@@ -408,8 +417,10 @@ export function applyFilters(releases: Release[], f: FilterState): Release[] {
       if (!d || !f.decade.has(d)) return false;
     }
     if (f.genre.size > 0) {
+      // Any-slot match — release passes if ANY of its 0–3 genre slots is in
+      // the selected set. Primary-only would hide v2-multi-tagged releases.
       let any = false;
-      for (const g of r.tags) {
+      for (const g of r.genres) {
         if (f.genre.has(g)) {
           any = true;
           break;
