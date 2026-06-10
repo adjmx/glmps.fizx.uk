@@ -8,6 +8,11 @@ import {
   type FilterState,
   type Release,
 } from "@/lib/nostr";
+import {
+  GENRE_ELECTRONIC_SUBS,
+  GENRE_MAINS,
+  genreLabel,
+} from "@/lib/genre";
 
 const LABEL_FACET_DEFAULT_TOP_N = 15;
 
@@ -15,6 +20,10 @@ type Props = {
   releases: Release[];
   value: FilterState;
   onChange: (next: FilterState) => void;
+  // Optional cluster anchored to the right of the facet row (e.g. result
+  // count + view toggle). Aligned to the top so it stays reachable when
+  // facets wrap to multiple lines on narrow screens.
+  rightSlot?: React.ReactNode;
 };
 
 const DECADE_ORDER = [
@@ -61,7 +70,7 @@ const CONDITION_ORDER = [
   "Poor (P)",
 ];
 
-export default function FilterBar({ releases, value, onChange }: Props) {
+export default function FilterBar({ releases, value, onChange, rightSlot }: Props) {
   // Derive option lists from the current release set. Mediums are clamped to
   // the canonical two — physical/digital — even if the data is dirty, so the
   // facet stays predictable.
@@ -85,7 +94,7 @@ export default function FilterBar({ releases, value, onChange }: Props) {
       if (r.country) countrySet.add(r.country);
       const d = decadeOf(r.year);
       if (d) decadeSet.add(d);
-      for (const t of r.tags) genreSet.add(t);
+      for (const g of r.genres) genreSet.add(g);
       if (r.label) labelCounts.set(r.label, (labelCounts.get(r.label) ?? 0) + 1);
       else noLabelCount++;
     }
@@ -120,7 +129,22 @@ export default function FilterBar({ releases, value, onChange }: Props) {
           .sort(),
       ],
       decade: DECADE_ORDER.filter((d) => decadeSet.has(d)),
-      genre: Array.from(genreSet).sort(),
+      // Schema-defined order: mains first, then electronic subs. Any unknown
+      // slug shouldn't reach here (normaliseGenres drops them on parse), but
+      // appended alphabetically as a safety net.
+      genre: [
+        ...GENRE_MAINS.filter((g) => genreSet.has(g)),
+        ...GENRE_ELECTRONIC_SUBS.filter((g) => genreSet.has(g)),
+        ...Array.from(genreSet)
+          .filter(
+            (g) =>
+              !GENRE_MAINS.includes(g as (typeof GENRE_MAINS)[number]) &&
+              !GENRE_ELECTRONIC_SUBS.includes(
+                g as (typeof GENRE_ELECTRONIC_SUBS)[number],
+              ),
+          )
+          .sort(),
+      ],
       // Keep schema-defined order; append any unknown values so dirty data
       // is still selectable.
       type: [
@@ -202,7 +226,8 @@ export default function FilterBar({ releases, value, onChange }: Props) {
 
   return (
     <div className="mb-6">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
         {options.type.length > 0 && (
           <FacetButton
             label="type"
@@ -243,6 +268,7 @@ export default function FilterBar({ releases, value, onChange }: Props) {
             options={options.genre}
             selected={value.genre}
             onChange={(next) => set("genre", next)}
+            labelFn={genreLabel}
           />
         )}
         {options.label.length > 0 && (
@@ -270,22 +296,12 @@ export default function FilterBar({ releases, value, onChange }: Props) {
             onChange={(next) => set("condition", next)}
           />
         )}
+        </div>
+        {rightSlot && <div className="shrink-0">{rightSlot}</div>}
       </div>
 
-      {(chips.length > 0 || value.search) && (
+      {chips.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {value.search && (
-            <button
-              type="button"
-              onClick={() => set("search", "")}
-              className="font-mono text-[10px] px-2 py-0.5 rounded-full border border-accent/40 text-accent hover:bg-accent/10 transition-colors flex items-center gap-1"
-            >
-              <span className="opacity-60">"</span>
-              <span className="max-w-[12rem] truncate">{value.search}</span>
-              <span className="opacity-60">"</span>
-              <span aria-hidden>×</span>
-            </button>
-          )}
           {chips.map(({ facet, value: v }) => (
             <button
               key={`${facet}:${v}`}
@@ -294,7 +310,7 @@ export default function FilterBar({ releases, value, onChange }: Props) {
               className="font-mono text-[10px] px-2 py-0.5 rounded-full border border-primary/40 text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
             >
               <span className="opacity-60">{facet}:</span>
-              <span>{v}</span>
+              <span>{facet === "genre" ? genreLabel(v) : v}</span>
               <span aria-hidden>×</span>
             </button>
           ))}

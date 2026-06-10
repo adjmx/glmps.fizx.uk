@@ -11,6 +11,10 @@ type Props = {
   // When provided, a search input appears above the list. Typing filters
   // matches from this full superset; an empty query falls back to `options`.
   searchableOptions?: string[];
+  // Display transform — values pass through unchanged in the selected Set,
+  // but the popover, trigger summary, and chip text use the rendered form.
+  // Used by genre facet to turn wire slugs like `dnb-jungle` into `dnb/jungle`.
+  labelFn?: (value: string) => string;
 };
 
 /**
@@ -25,7 +29,9 @@ export default function FacetButton({
   onChange,
   emptyLabel = "any",
   searchableOptions,
+  labelFn,
 }: Props) {
+  const render = (v: string) => (labelFn ? labelFn(v) : v);
   const { open, toggle, close, ref } = usePopover<HTMLDivElement>();
   const [query, setQuery] = useState("");
 
@@ -49,7 +55,7 @@ export default function FacetButton({
     selected.size === 0
       ? emptyLabel
       : selected.size === 1
-        ? Array.from(selected)[0]
+        ? render(Array.from(selected)[0])
         : `${selected.size} selected`;
 
   return (
@@ -151,7 +157,7 @@ export default function FacetButton({
                         </svg>
                       )}
                     </span>
-                    <span className="truncate">{opt}</span>
+                    <span className="truncate">{render(opt)}</span>
                   </button>
                 </li>
               );

@@ -4,8 +4,13 @@ import { RELEASE_KIND } from "@/config";
 import { cn } from "@/lib/cn";
 import { useReactions } from "@/hooks/useReactions";
 import { displayCount } from "@/lib/rating";
+import { genreLabel } from "@/lib/genre";
 import StarRow from "./StarRow";
 import OwnerNaddrCopy from "./OwnerNaddrCopy";
+
+// release.v2 — left-edge genre bar uses slot-proportional weights from the
+// proposal: 60 / 30 / 10. Missing slots renormalise so a single slot fills.
+const SLOT_WEIGHTS = [0.6, 0.3, 0.1];
 
 export type CardDensity = "default" | "sm";
 
@@ -31,10 +36,33 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
       to={`/r/${naddr}`}
       title={`${release.artist} – ${release.title}`}
       className={cn(
-        "group block rounded-lg border border-border bg-card hover:border-primary/40",
+        "group relative block rounded-lg border border-border bg-card hover:border-primary/40",
         "transition-colors overflow-hidden",
       )}
     >
+      {release.genres.length > 0 && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-1 z-10 pointer-events-none flex flex-col"
+          aria-hidden="true"
+          title={release.genres.map((g) => genreLabel(g)).join(" · ")}
+        >
+          {release.genres.map((g, i) => {
+            const total = release.genres.reduce(
+              (acc, _, idx) => acc + SLOT_WEIGHTS[idx],
+              0,
+            );
+            return (
+              <div
+                key={i}
+                style={{
+                  height: `${(SLOT_WEIGHTS[i] / total) * 100}%`,
+                  backgroundColor: `rgb(var(--c-g-${g}))`,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
       <div className="relative aspect-square bg-gradient-to-br from-muted/40 to-card flex items-center justify-center text-muted-foreground/30 text-xs">
         <div className="absolute top-1.5 left-1.5 z-10">
           <span

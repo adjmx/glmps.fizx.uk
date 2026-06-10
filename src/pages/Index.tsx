@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import AnimatedTitle from "@/components/AnimatedTitle";
 import StatsSummary from "@/components/StatsSummary";
+import GenreBar from "@/components/GenreBar";
 import ReleaseCard from "@/components/ReleaseCard";
 import ReleaseRow from "@/components/ReleaseRow";
 import FilterBar from "@/components/FilterBar";
@@ -101,60 +102,84 @@ export default function Index() {
       <Nav />
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
-          {/* Header — hero card: title | relays | discography | labels */}
+          {/* Header — hero card: [title | relays | discography / search] | labels */}
           <div className="bg-card border border-border">
-            <div
-              className={`min-h-[110px] grid grid-cols-1 ${
-                hasLabelImages
-                  ? "sm:grid-cols-[auto_1fr_13rem_12rem]"
-                  : "sm:grid-cols-[auto_1fr_13rem]"
-              } divide-y sm:divide-y-0 sm:divide-x divide-border`}
-            >
-              <div className="px-4 py-3 min-w-0 flex flex-col">
-              <div className="flex items-start gap-1.5">
-                <AnimatedTitle
-                  accent="glmps"
-                  rest=""
-                  from="#34d399"
-                  to="#a78bfa"
-                  suffixRgba="rgba(52,211,153,0.55)"
-                  fontSize="clamp(28px, 5vw, 40px)"
-                />
-                <span className="mt-2.5 inline-block rounded-full border border-accent text-accent font-mono text-[10px] px-2 py-0.5 shrink-0">
-                  31237
-                </span>
+            <div className="flex flex-col sm:flex-row sm:divide-x divide-border">
+              {/* Left half: top row (title | relays | stats) + search row */}
+              <div className="flex-1 min-w-0 flex flex-col">
+                <div className="min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_13rem] divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
+                  <div className="px-4 py-3 min-w-0 flex flex-col justify-center">
+                    <div className="flex items-start gap-1.5">
+                      <AnimatedTitle
+                        accent="glmps"
+                        rest=""
+                        from="#34d399"
+                        to="#a78bfa"
+                        suffixRgba="rgba(52,211,153,0.55)"
+                        fontSize="clamp(28px, 5vw, 40px)"
+                      />
+                      <span className="mt-2.5 inline-block rounded-full border border-accent text-accent font-mono text-[10px] px-2 py-0.5 shrink-0">
+                        31237
+                      </span>
+                    </div>
+                  </div>
+                  {hex && (
+                    <div className="px-4 py-3 font-mono flex flex-col justify-center">
+                      <RelayStats
+                        urls={DEFAULT_RELAYS}
+                        filter={{ kinds: [RELEASE_KIND], authors: [hex] }}
+                      />
+                    </div>
+                  )}
+                  {hex && (
+                    <div className="px-4 py-3 flex flex-col justify-center">
+                      <StatsSummary releases={releases} bare />
+                    </div>
+                  )}
+                </div>
+                <div className="border-t border-border px-4 py-2 flex items-center gap-2">
+                  <SearchInput
+                    value={filters.search}
+                    onChange={(v) => setFilters((prev) => ({ ...prev, search: v }))}
+                    className="max-w-[20rem]"
+                  />
+                  {filters.search && (
+                    <button
+                      type="button"
+                      onClick={() => setFilters((prev) => ({ ...prev, search: "" }))}
+                      className="shrink-0 font-mono text-[10px] px-2 py-0.5 rounded-full border border-accent/40 text-accent hover:bg-accent/10 transition-colors flex items-center gap-1"
+                    >
+                      <span className="opacity-60">"</span>
+                      <span className="max-w-[8rem] truncate">{filters.search}</span>
+                      <span className="opacity-60">"</span>
+                      <span aria-hidden>×</span>
+                    </button>
+                  )}
+                  {releases.length > 0 && (
+                    <span className="ml-auto shrink-0 whitespace-nowrap text-[11px] font-mono text-muted-foreground/70">
+                      {visible.length.toLocaleString()}{" "}
+                      {visible.length === 1 ? "release" : "releases"}
+                      {visible.length !== releases.length && (
+                        <span className="opacity-50">
+                          {" "}
+                          / {releases.length.toLocaleString()}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-            {hex && (
-              <div className="px-4 py-3 font-mono">
-                <RelayStats
-                  urls={DEFAULT_RELAYS}
-                  filter={{ kinds: [RELEASE_KIND], authors: [hex] }}
-                />
-              </div>
-            )}
-            {hex && (
-              <div className="px-4 py-3 flex flex-col">
-                <StatsSummary releases={releases} bare />
-              </div>
-            )}
-            {hex && hasLabelImages && (
-              <div className="px-4 py-3 font-mono">
-                <LabelCycler
-                  releases={releases}
-                  library={library}
-                  activeLabel={activeLabel}
-                  onLabelClick={handleLabelClick}
-                />
-              </div>
-            )}
-            </div>
-            <div className="border-t border-border px-4 py-3">
-              <SearchInput
-                value={filters.search}
-                onChange={(v) => setFilters((prev) => ({ ...prev, search: v }))}
-                className="max-w-[24rem]"
-              />
+              {/* Right half: labels column, full card height */}
+              {hex && hasLabelImages && (
+                <div className="px-4 py-3 font-mono border-t sm:border-t-0 border-border sm:w-[12rem] sm:shrink-0">
+                  <LabelCycler
+                    releases={releases}
+                    library={library}
+                    activeLabel={activeLabel}
+                    onLabelClick={handleLabelClick}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -170,24 +195,17 @@ export default function Index() {
               releases={releases}
               value={filters}
               onChange={setFilters}
+              rightSlot={
+                releases.length > 0 ? (
+                  <ViewToggle value={view} onChange={setView} />
+                ) : null
+              }
             />
 
-            {/* Result count + view toggle */}
-            {releases.length > 0 && (
-              <div className="flex items-center justify-between mb-4 text-[11px] font-mono text-muted-foreground/70">
-                <span>
-                  {visible.length.toLocaleString()}{" "}
-                  {visible.length === 1 ? "release" : "releases"}
-                  {visible.length !== releases.length && (
-                    <span className="opacity-50">
-                      {" "}
-                      / {releases.length.toLocaleString()}
-                    </span>
-                  )}
-                </span>
-                <ViewToggle value={view} onChange={setView} />
-              </div>
-            )}
+            {/* Primary-genre distribution — full-width, ends flush with the
+                release grid. Sub-linear width allocation keeps the long tail
+                visible even when one genre dominates. Filter-aware. */}
+            <GenreBar releases={visible} />
 
             {loading && !eose && (
               <div className="text-xs text-muted-foreground/60 font-mono">
