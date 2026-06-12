@@ -25,7 +25,6 @@ export default function ReleaseRow({ release }: Props) {
   const addr = `${RELEASE_KIND}:${release.pubkey}:${release.d}`;
   const { forAddr } = useReactions();
   const { up, down, info } = forAddr(addr);
-  const hasReactions = up > 0 || down > 0 || info > 0;
 
   return (
     <Link
@@ -73,12 +72,8 @@ export default function ReleaseRow({ release }: Props) {
           {/* Reactions slot — fixed width so layout stays stable whether
               or not a release has any reactions yet. */}
           <span className="w-16 sm:w-20 flex items-center justify-end gap-1 text-[10px] font-mono text-muted-foreground/70">
-            {hasReactions && (
-              <>
-                <StarRow up={up} down={down} size="xs" />
-                {info > 0 && <span className="opacity-60">+{displayCount(info)}</span>}
-              </>
-            )}
+            <StarRow up={up} down={down} size="xs" showWhenUnrated />
+            {info > 0 && <span className="opacity-60">+{displayCount(info)}</span>}
           </span>
           <span className="w-12 text-right text-[9px] uppercase tracking-widest text-muted-foreground/40 shrink-0">
             {release.medium === "physical" ? "physical" : "digital"}

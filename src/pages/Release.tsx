@@ -5,6 +5,7 @@ import ReactionSummary from "@/components/ReactionSummary";
 import { hostnameOf, naddrDecode, type Release } from "@/lib/nostr";
 import { useReleaseByAddr } from "@/hooks/useReleaseByAddr";
 import { useLabelLibrary, imageForLabel } from "@/hooks/useLabelLibrary";
+import { genreLabel, type GenreSlug } from "@/lib/genre";
 import { RELEASE_KIND } from "@/config";
 
 export default function ReleasePage() {
@@ -110,6 +111,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
       <dl className="grid grid-cols-1 lg:grid-cols-[24rem_16rem] gap-x-6 gap-y-3 text-sm">
         <Field label="type" value={release.type} />
         <Field label="category" value={release.category} />
+        <GenresField genres={release.genres} />
         <Field label="medium" value={release.medium} />
         <Field label="format" value={release.format} />
         <Field label="year" value={release.year} />
@@ -194,6 +196,35 @@ function Field({ label, value }: { label: string; value?: string }) {
         {label}
       </dt>
       <dd className="text-sm">{value}</dd>
+    </div>
+  );
+}
+
+/**
+ * release.v2 — ordered 0–3 genre slots displayed as a row of colored dots +
+ * names. Slot 0 (the primary) comes first. Hidden when the release carries no
+ * genre tags. Slug → label via `genreLabel` (preserves the `soundtrack` → `film`
+ * override and the compound-slug slash rule).
+ */
+function GenresField({ genres }: { genres: readonly GenreSlug[] }) {
+  if (genres.length === 0) return null;
+  return (
+    <div className="flex gap-3">
+      <dt className="text-[10px] uppercase tracking-widest text-muted-foreground/50 w-20 mt-1 shrink-0">
+        genre
+      </dt>
+      <dd className="text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+        {genres.map((g) => (
+          <span key={g} className="inline-flex items-center gap-1.5">
+            <span
+              className="w-2 h-2 rounded-full ring-1 ring-foreground/10 shrink-0"
+              style={{ backgroundColor: `rgb(var(--c-g-${g}))` }}
+              aria-hidden="true"
+            />
+            <span>{genreLabel(g)}</span>
+          </span>
+        ))}
+      </dd>
     </div>
   );
 }

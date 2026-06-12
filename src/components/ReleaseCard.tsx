@@ -4,13 +4,9 @@ import { RELEASE_KIND } from "@/config";
 import { cn } from "@/lib/cn";
 import { useReactions } from "@/hooks/useReactions";
 import { displayCount } from "@/lib/rating";
-import { genreLabel } from "@/lib/genre";
 import StarRow from "./StarRow";
 import OwnerNaddrCopy from "./OwnerNaddrCopy";
-
-// release.v2 — left-edge genre bar uses slot-proportional weights from the
-// proposal: 60 / 30 / 10. Missing slots renormalise so a single slot fills.
-const SLOT_WEIGHTS = [0.6, 0.3, 0.1];
+import GenreDotChip from "./GenreDotChip";
 
 export type CardDensity = "default" | "sm";
 
@@ -36,33 +32,10 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
       to={`/r/${naddr}`}
       title={`${release.artist} – ${release.title}`}
       className={cn(
-        "group relative block rounded-lg border border-border bg-card hover:border-primary/40",
+        "group block rounded-lg border border-border bg-card hover:border-primary/40",
         "transition-colors overflow-hidden",
       )}
     >
-      {release.genres.length > 0 && (
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1 z-10 pointer-events-none flex flex-col"
-          aria-hidden="true"
-          title={release.genres.map((g) => genreLabel(g)).join(" · ")}
-        >
-          {release.genres.map((g, i) => {
-            const total = release.genres.reduce(
-              (acc, _, idx) => acc + SLOT_WEIGHTS[idx],
-              0,
-            );
-            return (
-              <div
-                key={i}
-                style={{
-                  height: `${(SLOT_WEIGHTS[i] / total) * 100}%`,
-                  backgroundColor: `rgb(var(--c-g-${g}))`,
-                }}
-              />
-            );
-          })}
-        </div>
-      )}
       <div className="relative aspect-square bg-gradient-to-br from-muted/40 to-card flex items-center justify-center text-muted-foreground/30 text-xs">
         <div className="absolute top-1.5 left-1.5 z-10">
           <span
@@ -118,30 +91,38 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
 
       <div
         className={cn(
-          isSm ? "p-2 space-y-1" : "p-3 sm:p-4 space-y-1.5",
+          isSm ? "p-2 space-y-0.5" : "p-3 sm:p-4 space-y-1.5",
         )}
       >
+        <GenreDotChip genres={release.genres} />
         <div
           className={cn(
-            "uppercase tracking-wider text-accent/70 truncate",
-            isSm ? "text-[9px]" : "text-[10px]",
+            "uppercase tracking-wider text-accent/70 truncate text-[10px]",
           )}
         >
           {release.artist}
         </div>
         <h3
           className={cn(
-            "font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2",
-            isSm ? "text-xs sm:text-[13px]" : "text-sm sm:text-base",
+            "font-medium group-hover:text-primary transition-colors",
+            isSm
+              ? "text-[10px] leading-tight line-clamp-1"
+              : "text-sm sm:text-base leading-snug line-clamp-2",
           )}
         >
           {release.title}
         </h3>
 
-        {/* Drop facets row + tag chips at small density — visually noisy
-            at <200px card widths and rarely useful for at-a-glance scanning. */}
-        {!isSm && facets && (
-          <div className="text-[11px] text-muted-foreground/85 truncate">
+        {/* Facets row: year · format · label · country. Same text-[10px] in
+            compact so artist / title / meta sit on one tight visual rhythm.
+            Tag chips still dropped in compact — too noisy at <200px widths. */}
+        {facets && (
+          <div
+            className={cn(
+              "text-muted-foreground/85 truncate",
+              isSm ? "text-[10px]" : "text-[11px]",
+            )}
+          >
             {facets}
           </div>
         )}
@@ -158,14 +139,14 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
           </div>
         )}
 
-        {(up > 0 || down > 0 || info > 0) && (
+        {(isSm || up > 0 || down > 0 || info > 0) && (
           <div
             className={cn(
               "flex items-center gap-2 font-mono text-muted-foreground/70",
               isSm ? "text-[9px]" : "text-[10px] pt-1",
             )}
           >
-            <StarRow up={up} down={down} size="xs" />
+            <StarRow up={up} down={down} size="xs" showWhenUnrated={isSm} />
             {info > 0 && <span>· {displayCount(info)} + info</span>}
           </div>
         )}

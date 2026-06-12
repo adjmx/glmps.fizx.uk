@@ -15,6 +15,14 @@ type Props = {
   // but the popover, trigger summary, and chip text use the rendered form.
   // Used by genre facet to turn wire slugs like `dnb-jungle` into `dnb/jungle`.
   labelFn?: (value: string) => string;
+  // Optional per-option occurrence counts. When provided, each row in the
+  // popover shows the count as a muted suffix. Used by the genre facet so the
+  // dropdown doubles as a "how many releases per slug" reference.
+  counts?: Map<string, number>;
+  // Optional resting text colour for the trigger when unselected — used by
+  // FilterBar to lay a primary→accent gradient across the row of buttons.
+  // Hover + selected states still take priority over this.
+  gradientColor?: string;
 };
 
 /**
@@ -30,6 +38,8 @@ export default function FacetButton({
   emptyLabel = "any",
   searchableOptions,
   labelFn,
+  counts,
+  gradientColor,
 }: Props) {
   const render = (v: string) => (labelFn ? labelFn(v) : v);
   const { open, toggle, close, ref } = usePopover<HTMLDivElement>();
@@ -63,11 +73,18 @@ export default function FacetButton({
       <button
         type="button"
         onClick={toggle}
+        style={
+          gradientColor
+            ? ({ ["--btn-grad" as string]: gradientColor } as React.CSSProperties)
+            : undefined
+        }
         className={cn(
           "font-mono text-[11px] px-2 py-1 border rounded transition-colors flex items-center gap-1.5 max-w-[14rem]",
           selected.size > 0
             ? "border-primary/50 text-primary bg-primary/10"
-            : "border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40",
+            : gradientColor
+              ? "border-border text-[color:var(--btn-grad)] hover:text-foreground hover:border-muted-foreground/40"
+              : "border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40",
         )}
         aria-expanded={open}
         aria-haspopup="listbox"
@@ -157,7 +174,12 @@ export default function FacetButton({
                         </svg>
                       )}
                     </span>
-                    <span className="truncate">{render(opt)}</span>
+                    <span className="truncate flex-1">{render(opt)}</span>
+                    {counts?.has(opt) && (
+                      <span className="ml-2 shrink-0 tabular-nums text-muted-foreground/50">
+                        {counts.get(opt)}
+                      </span>
+                    )}
                   </button>
                 </li>
               );

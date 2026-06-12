@@ -1,21 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import type { LabelLibrary, Release } from "@/lib/nostr";
-import { genreLabel, type GenreSlug } from "@/lib/genre";
+import { type GenreSlug } from "@/lib/genre";
+import GenreDotChip from "./GenreDotChip";
 
 /**
- * Label "dominant genre" per release.v2 §"Aggregation rule" — primary slot
- * only. Modal slug across the label's releases; ties broken alphabetically.
- * Undefined when no release on the label carries any primary-slot genre.
+ * Top genre slugs for the label, ranked by any-slot count (ties broken
+ * alphabetically). Per `schema/visualisations.md` `genre-dominant-of-set`:
+ * a release with N distinct slugs contributes N tallies. Returns up to
+ * `max` slugs — fewer when the label has fewer distinct genres, empty
+ * when no release on the label carries any genre.
  */
-function dominantPrimary(counts: Map<string, number>): GenreSlug | undefined {
-  if (counts.size === 0) return undefined;
-  let best: [string, number] | undefined;
-  for (const [slug, n] of counts) {
-    if (!best || n > best[1] || (n === best[1] && slug < best[0])) {
-      best = [slug, n];
-    }
-  }
-  return best?.[0] as GenreSlug | undefined;
+function topGenresForLabel(
+  counts: Map<string, number>,
+  max: number,
+): GenreSlug[] {
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, max)
+    .map(([slug]) => slug as GenreSlug);
 }
 
 type Props = {
@@ -45,29 +47,28 @@ export default function LabelCycler({
 }: Props) {
   // Distinct labels in the release set that also have an image in the
   // manifest. Sorted by release count desc, ties broken alphabetically.
-  // Each entry carries its dominant primary-slot genre (release.v2) for the
-  // colored dot beside the label name.
+  // Each entry carries its top-3 any-slot genres for the colored dot chip
+  // beside the label name (see schema/visualisations.md).
   const entries = useMemo(() => {
     if (!library) return [];
-    type Agg = { count: number; primaries: Map<string, number> };
+    type Agg = { count: number; genreCounts: Map<string, number> };
     const agg = new Map<string, Agg>();
     for (const r of releases) {
       if (!r.label || !library.labels[r.label]) continue;
-      const e = agg.get(r.label) ?? { count: 0, primaries: new Map() };
+      const e = agg.get(r.label) ?? { count: 0, genreCounts: new Map() };
       e.count += 1;
-      if (r.genres.length > 0) {
-        const p = r.genres[0];
-        e.primaries.set(p, (e.primaries.get(p) ?? 0) + 1);
+      for (const g of r.genres) {
+        e.genreCounts.set(g, (e.genreCounts.get(g) ?? 0) + 1);
       }
       agg.set(r.label, e);
     }
     return Array.from(agg.entries())
       .sort((a, b) => b[1].count - a[1].count || a[0].localeCompare(b[0]))
-      .map(([name, { count, primaries }]) => ({
+      .map(([name, { count, genreCounts }]) => ({
         name,
         count,
         image: library.labels[name].image,
-        dominantGenre: dominantPrimary(primaries),
+        topGenres: topGenresForLabel(genreCounts, 3),
       }));
   }, [releases, library]);
 
@@ -105,11 +106,24 @@ export default function LabelCycler({
           : "border-border hover:border-primary/40"
       }`}
     >
-      <div className="relative">
+      <div className="flex items-stretch">
+        {entries.length > 1 && (
+          <button
+            type="button"
+            onClick={() => step(-1)}
+            aria-label="Previous label"
+            title="Previous label"
+            className="shrink-0 w-5 grid place-items-center text-foreground/60 hover:bg-card/60 hover:text-primary transition-colors"
+          >
+            <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2}>
+              <polyline points="10 3 5 8 10 13" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
         <button
           type="button"
           onClick={() => onLabelClick(current.name)}
-          className="block w-full text-left"
+          className="flex-1 min-w-0 block text-left"
           title={isActive ? `Clear ${current.name} filter` : `Filter by ${current.name}`}
           aria-label={`Filter releases by label ${current.name}`}
         >
@@ -123,54 +137,32 @@ export default function LabelCycler({
           </div>
         </button>
         {entries.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={() => step(-1)}
-              aria-label="Previous label"
-              title="Previous label"
-              className="absolute left-0.5 top-1/2 -translate-y-1/2 w-5 h-5 grid place-items-center text-foreground/60 hover:text-primary opacity-60 hover:opacity-100 transition"
-            >
-              <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2}>
-                <polyline points="10 3 5 8 10 13" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => step(1)}
-              aria-label="Next label"
-              title="Next label"
-              className="absolute right-0.5 top-1/2 -translate-y-1/2 w-5 h-5 grid place-items-center text-foreground/60 hover:text-primary opacity-60 hover:opacity-100 transition"
-            >
-              <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2}>
-                <polyline points="6 3 11 8 6 13" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={() => step(1)}
+            aria-label="Next label"
+            title="Next label"
+            className="shrink-0 w-5 grid place-items-center text-foreground/60 hover:bg-card/60 hover:text-primary transition-colors"
+          >
+            <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2}>
+              <polyline points="6 3 11 8 6 13" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         )}
       </div>
-      <div className="px-2 py-1 flex items-center justify-between gap-1 text-[9px]">
-        <span className="flex items-center gap-1.5 min-w-0">
-          {current.dominantGenre && (
-            <span
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{
-                backgroundColor: `rgb(var(--c-g-${current.dominantGenre}))`,
-              }}
-              title={`primary genre: ${genreLabel(current.dominantGenre)}`}
-              aria-hidden="true"
-            />
-          )}
+      <div className="px-2 py-1 flex flex-col gap-1 text-[9px]">
+        <GenreDotChip genres={current.topGenres} className="self-start" />
+        <div className="flex items-center justify-between gap-1">
           <span
             className={`truncate ${isActive ? "text-primary" : "text-foreground/70"}`}
             title={current.name}
           >
             {current.name}
           </span>
-        </span>
-        <span className="shrink-0 tabular-nums text-muted-foreground/60">
-          {current.count}
-        </span>
+          <span className="shrink-0 tabular-nums text-muted-foreground/60">
+            {current.count}
+          </span>
+        </div>
       </div>
     </div>
   );

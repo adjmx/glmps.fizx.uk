@@ -78,7 +78,7 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
     const mediumSet = new Set<string>();
     const formatSet = new Set<string>();
     const decadeSet = new Set<string>();
-    const genreSet = new Set<string>();
+    const genreCounts = new Map<string, number>();
     const typeSet = new Set<string>();
     const categorySet = new Set<string>();
     const conditionSet = new Set<string>();
@@ -94,10 +94,17 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
       if (r.country) countrySet.add(r.country);
       const d = decadeOf(r.year);
       if (d) decadeSet.add(d);
-      for (const g of r.genres) genreSet.add(g);
+      // Genre counts are any-slot — a release with ["techno", "dub"] adds 1
+      // to both counts, matching how the filter predicate selects (see
+      // src/lib/nostr.ts → applyFilters). Lets the dropdown show how many
+      // releases each chip would surface.
+      for (const g of r.genres) {
+        genreCounts.set(g, (genreCounts.get(g) ?? 0) + 1);
+      }
       if (r.label) labelCounts.set(r.label, (labelCounts.get(r.label) ?? 0) + 1);
       else noLabelCount++;
     }
+    const genreSet: Set<string> = new Set(genreCounts.keys());
     // Top-N labels by release count, ties broken alphabetically. The "(no
     // label)" sentinel is pinned to the top of the default view when any
     // unlabeled release exists. The full alpha-sorted superset is exposed
@@ -145,6 +152,7 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
           )
           .sort(),
       ],
+      genreCounts,
       // Keep schema-defined order; append any unknown values so dirty data
       // is still selectable.
       type: [
@@ -171,6 +179,27 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
 
   const set = <K extends keyof FilterState>(key: K, next: FilterState[K]) =>
     onChange({ ...value, [key]: next });
+
+  // Resting-state text colours for the facet trigger row: each visible button
+  // gets a colour along a primary→accent gradient that mirrors the hero
+  // title. Hover + selected take over from this.
+  const visibleFacets = [
+    options.type.length > 0 && "type",
+    options.category.length > 0 && "category",
+    "medium",
+    "format",
+    "decade",
+    options.genre.length > 0 && "genre",
+    options.label.length > 0 && "label",
+    options.country.length > 0 && "country",
+    options.condition.length > 0 && "condition",
+  ].filter(Boolean) as string[];
+  const facetColor = (key: string): string => {
+    const i = visibleFacets.indexOf(key);
+    if (i < 0 || visibleFacets.length <= 1) return "hsl(var(--primary))";
+    const pct = (i / (visibleFacets.length - 1)) * 100;
+    return `color-mix(in oklch, hsl(var(--primary)), hsl(var(--accent)) ${pct}%)`;
+  };
 
   type Facet =
     | "medium"
@@ -234,6 +263,7 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
             options={options.type}
             selected={value.type}
             onChange={(next) => set("type", next)}
+            gradientColor={facetColor("type")}
           />
         )}
         {options.category.length > 0 && (
@@ -242,6 +272,7 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
             options={options.category}
             selected={value.category}
             onChange={(next) => set("category", next)}
+            gradientColor={facetColor("category")}
           />
         )}
         <FacetButton
@@ -249,18 +280,21 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
           options={options.medium}
           selected={value.medium}
           onChange={(next) => set("medium", next)}
+          gradientColor={facetColor("medium")}
         />
         <FacetButton
           label="format"
           options={options.format}
           selected={value.format}
           onChange={(next) => set("format", next)}
+          gradientColor={facetColor("format")}
         />
         <FacetButton
           label="decade"
           options={options.decade}
           selected={value.decade}
           onChange={(next) => set("decade", next)}
+          gradientColor={facetColor("decade")}
         />
         {options.genre.length > 0 && (
           <FacetButton
@@ -269,6 +303,8 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
             selected={value.genre}
             onChange={(next) => set("genre", next)}
             labelFn={genreLabel}
+            counts={options.genreCounts}
+            gradientColor={facetColor("genre")}
           />
         )}
         {options.label.length > 0 && (
@@ -278,6 +314,7 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
             searchableOptions={options.labelSearchable}
             selected={value.label}
             onChange={(next) => set("label", next)}
+            gradientColor={facetColor("label")}
           />
         )}
         {options.country.length > 0 && (
@@ -286,6 +323,7 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
             options={options.country}
             selected={value.country}
             onChange={(next) => set("country", next)}
+            gradientColor={facetColor("country")}
           />
         )}
         {options.condition.length > 0 && (
@@ -294,6 +332,7 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
             options={options.condition}
             selected={value.condition}
             onChange={(next) => set("condition", next)}
+            gradientColor={facetColor("condition")}
           />
         )}
         </div>

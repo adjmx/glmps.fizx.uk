@@ -8,32 +8,29 @@ type Props = {
 };
 
 /**
- * Horizontal stacked indicator showing the share of releases by primary-slot
- * genre. Primary-only counting (release.v2 §"Aggregation rule") so a
- * multi-tagged release is counted exactly once.
+ * Horizontal stacked indicator showing the share of releases by genre.
+ * Any-slot counting per `schema/visualisations.md` `genre-distribution` —
+ * a release with N distinct slugs contributes N tallies (one per slug).
+ * v2.1's pure-peer model means secondary/tertiary genres are equally
+ * part of a release's sound; slot order on the wire is emission priority
+ * only, not aggregation weight.
  *
- * Width allocation is sub-linear (share ∝ count^0.7) — a soft tail boost so
- * a dominant slug stays clearly the biggest band but doesn't erase the rest
- * of the catalogue from view. Pure cosmetic; there are no numbers on the bar.
+ * Width allocation is sub-linear (share ∝ count^0.5, i.e. square-root) —
+ * a strong tail boost so a heavily dominant slug doesn't drown the rest
+ * of the catalogue. Pure cosmetic; there are no numbers on the bar.
  *
- * Rationale: the first cut went the other way (k ≈ 2.0, amplifying dominance)
- * and made an 88%-electronic library read as 99% pink with the tail squeezed
- * into a single pixel. For a library indicator the opposite curve is wanted —
- * dominance is still legible, but every primary slug that's actually present
- * gets a readable band.
- *
- * Returns null when no releases carry a primary genre, so the surface is
- * silently dormant until ndisc starts emitting v2 events.
+ * Per-genre counts live in the FilterBar dropdown when accurate numbers
+ * matter. Returns null when no releases carry any genre tag, so the
+ * surface is silently dormant until ndisc emits v2 events.
  */
-const SCALING_EXPONENT = 0.7;
+const SCALING_EXPONENT = 0.5;
 
 export default function GenreBar({ releases, className = "" }: Props) {
   const segments = useMemo(() => {
     const counts = new Map<string, number>();
     for (const r of releases) {
-      if (r.genres.length > 0) {
-        const p = r.genres[0];
-        counts.set(p, (counts.get(p) ?? 0) + 1);
+      for (const g of r.genres) {
+        counts.set(g, (counts.get(g) ?? 0) + 1);
       }
     }
     const total = Array.from(counts.values()).reduce((a, b) => a + b, 0);
@@ -54,10 +51,10 @@ export default function GenreBar({ releases, className = "" }: Props) {
 
   return (
     <div
-      className={`mb-4 w-3/4 mx-auto rounded-lg bg-black/60 p-3 border border-foreground/10 ${className}`}
+      className={`rounded-lg bg-background p-3 border border-foreground/10 ${className}`}
       aria-label="release count by primary genre"
     >
-      <div className="flex h-1.5 gap-px overflow-hidden">
+      <div className="flex h-1.5 gap-0.5 overflow-hidden">
         {segments.map(({ slug, n, pct }) => (
           <div
             key={slug}
@@ -68,6 +65,22 @@ export default function GenreBar({ releases, className = "" }: Props) {
             }}
             title={`${genreLabel(slug)}: ${n}`}
           />
+        ))}
+      </div>
+      {/* Legend strip — every present primary slug as a colored dot + name.
+          Ordering mirrors the bar (count desc, ties alphabetical), so chip
+          position = bar position. Per-genre counts live in the FilterBar's
+          genre facet dropdown rather than here. */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-mono">
+        {segments.map(({ slug }) => (
+          <span key={slug} className="inline-flex items-center gap-1 shrink-0">
+            <span
+              className="w-1 h-2 shrink-0"
+              style={{ backgroundColor: `rgb(var(--c-g-${slug}))` }}
+              aria-hidden="true"
+            />
+            <span className="text-foreground/75">{genreLabel(slug)}</span>
+          </span>
         ))}
       </div>
     </div>

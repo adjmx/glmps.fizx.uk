@@ -107,7 +107,7 @@ export default function Index() {
             <div className="flex flex-col sm:flex-row sm:divide-x divide-border">
               {/* Left half: top row (title | relays | stats) + search row */}
               <div className="flex-1 min-w-0 flex flex-col">
-                <div className="min-h-[110px] grid grid-cols-1 sm:grid-cols-[auto_1fr_13rem] divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
+                <div className="min-h-[110px] grid grid-cols-1 sm:grid-cols-[14rem_1fr_13rem] divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
                   <div className="px-4 py-3 min-w-0 flex flex-col justify-center">
                     <div className="flex items-start gap-1.5">
                       <AnimatedTitle
@@ -137,41 +137,54 @@ export default function Index() {
                     </div>
                   )}
                 </div>
-                <div className="border-t border-border px-4 py-2 flex items-center gap-2">
+                <div className="border-t border-border px-4 py-2">
                   <SearchInput
                     value={filters.search}
                     onChange={(v) => setFilters((prev) => ({ ...prev, search: v }))}
-                    className="max-w-[20rem]"
+                    className="max-w-none"
+                    trailing={
+                      <>
+                        {filters.search && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFilters((prev) => ({ ...prev, search: "" }))
+                            }
+                            title="Clear search"
+                            aria-label="Clear search"
+                            className="shrink-0 font-mono text-[11px] text-accent hover:text-primary transition-colors flex items-baseline gap-0.5"
+                          >
+                            <span className="opacity-60">"</span>
+                            <span>
+                              {filters.search.length > 15
+                                ? filters.search.slice(0, 15) + "…"
+                                : filters.search}
+                            </span>
+                            <span className="opacity-60">"</span>
+                            <span aria-hidden className="ml-1">×</span>
+                          </button>
+                        )}
+                        {releases.length > 0 && (
+                          <span className="shrink-0 whitespace-nowrap text-[11px] font-mono text-muted-foreground/70">
+                            {visible.length.toLocaleString()}{" "}
+                            {visible.length !== releases.length ? (
+                              <span className="opacity-50">
+                                / {releases.length.toLocaleString()}{" "}
+                                {releases.length === 1 ? "release" : "releases"}
+                              </span>
+                            ) : (
+                              <>{visible.length === 1 ? "release" : "releases"}</>
+                            )}
+                          </span>
+                        )}
+                      </>
+                    }
                   />
-                  {filters.search && (
-                    <button
-                      type="button"
-                      onClick={() => setFilters((prev) => ({ ...prev, search: "" }))}
-                      className="shrink-0 font-mono text-[10px] px-2 py-0.5 rounded-full border border-accent/40 text-accent hover:bg-accent/10 transition-colors flex items-center gap-1"
-                    >
-                      <span className="opacity-60">"</span>
-                      <span className="max-w-[8rem] truncate">{filters.search}</span>
-                      <span className="opacity-60">"</span>
-                      <span aria-hidden>×</span>
-                    </button>
-                  )}
-                  {releases.length > 0 && (
-                    <span className="ml-auto shrink-0 whitespace-nowrap text-[11px] font-mono text-muted-foreground/70">
-                      {visible.length.toLocaleString()}{" "}
-                      {visible.length === 1 ? "release" : "releases"}
-                      {visible.length !== releases.length && (
-                        <span className="opacity-50">
-                          {" "}
-                          / {releases.length.toLocaleString()}
-                        </span>
-                      )}
-                    </span>
-                  )}
                 </div>
               </div>
               {/* Right half: labels column, full card height */}
               {hex && hasLabelImages && (
-                <div className="px-4 py-3 font-mono border-t sm:border-t-0 border-border sm:w-[12rem] sm:shrink-0">
+                <div className="px-4 py-3 font-mono border-t sm:border-t-0 border-border sm:w-[15rem] sm:shrink-0">
                   <LabelCycler
                     releases={releases}
                     library={library}
@@ -181,6 +194,15 @@ export default function Index() {
                 </div>
               )}
             </div>
+            {/* Hero final row — primary-genre composition. Sits inside the
+                hero card so it can't be occluded by filter-bar dropdowns
+                opening below. Sub-linear (k=0.5) allocation keeps the long
+                tail readable; filter-aware via `visible`. */}
+            {hex && visible.some((r) => r.genres.length > 0) && (
+              <div className="border-t border-border p-3">
+                <GenreBar releases={visible} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -201,11 +223,6 @@ export default function Index() {
                 ) : null
               }
             />
-
-            {/* Primary-genre distribution — full-width, ends flush with the
-                release grid. Sub-linear width allocation keeps the long tail
-                visible even when one genre dominates. Filter-aware. */}
-            <GenreBar releases={visible} />
 
             {loading && !eose && (
               <div className="text-xs text-muted-foreground/60 font-mono">
