@@ -34,7 +34,7 @@ export default {
         },
         // release.v2 genre palette — see src/index.css :root for the source values.
         genre: {
-          classical: "rgb(var(--c-g-classical) / <alpha-value>)",
+          "classical-folk": "rgb(var(--c-g-classical-folk) / <alpha-value>)",
           downtempo: "rgb(var(--c-g-downtempo) / <alpha-value>)",
           electronic: "rgb(var(--c-g-electronic) / <alpha-value>)",
           experimental: "rgb(var(--c-g-experimental) / <alpha-value>)",

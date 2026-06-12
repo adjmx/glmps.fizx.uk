@@ -8,7 +8,7 @@
  */
 
 export const GENRE_MAINS = [
-  "classical",
+  "classical-folk",
   "downtempo",
   "electronic",
   "experimental",
@@ -50,12 +50,22 @@ export function isElectronicSub(s: string): s is GenreElectronicSub {
 }
 
 /**
- * Wire-to-display rule for compound slugs: `dnb-jungle` → `dnb/jungle`,
- * `drone-noise` → `drone/noise`, `footwork-trap` → `footwork/trap`. Flat
- * slugs (including `dub` post-v2.1.1 rename) pass through unchanged.
+ * Wire-to-display rule for human-facing UI.
+ *
+ * 1. Per-slug overrides (rare): the wire keeps the schema-canonical slug;
+ *    only the displayed label changes. Used here so `soundtrack` reads as
+ *    "film" — the slug stays `soundtrack` on the contract, so this is
+ *    glmps-side cosmetic only and doesn't affect filter matching.
+ * 2. Compound-slug fallback: `classical-folk` → `classical/folk`,
+ *    `dnb-jungle` → `dnb/jungle`, `drone-noise` → `drone/noise`,
+ *    `footwork-trap` → `footwork/trap`. Flat slugs pass through unchanged.
  */
+const DISPLAY_OVERRIDES: Record<string, string> = {
+  soundtrack: "film",
+};
+
 export function genreLabel(slug: string): string {
-  return slug.replace(/-/g, "/");
+  return DISPLAY_OVERRIDES[slug] ?? slug.replace(/-/g, "/");
 }
 
 /**

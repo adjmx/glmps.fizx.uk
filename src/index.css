@@ -21,9 +21,9 @@
 
     /* release.v2 genre palette — shared with ndisc + glmps.upleb.uk verbatim.
        Theme-independent (no .dark override). Reference via rgb(var(--c-g-<slug>) / <alpha>). */
-    --c-g-classical:     232 220 195;
+    --c-g-classical-folk:232 220 195;
     --c-g-downtempo:     122  74 140;
-    --c-g-electronic:    255  95 186;
+    --c-g-electronic:    140 140 140;
     --c-g-experimental:  106 168 168;
     --c-g-funk:          232 178  55;
     --c-g-jazz:          199 127  78;
