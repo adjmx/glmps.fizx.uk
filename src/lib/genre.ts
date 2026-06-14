@@ -8,11 +8,13 @@
  */
 
 export const GENRE_MAINS = [
+  "ambient",
   "classical-folk",
   "downtempo",
   "electronic",
   "experimental",
   "funk",
+  "hip-hop",
   "jazz",
   "pop",
   "reggae",
@@ -22,12 +24,14 @@ export const GENRE_MAINS = [
 
 export const GENRE_ELECTRONIC_SUBS = [
   "acid",
+  "bass",
   "breaks",
   "dnb-jungle",
   "drone-noise",
   "dub",
   "electro",
   "footwork-trap",
+  "house",
   "techno",
 ] as const;
 
@@ -56,16 +60,28 @@ export function isElectronicSub(s: string): s is GenreElectronicSub {
  *    only the displayed label changes. Used here so `soundtrack` reads as
  *    "film" — the slug stays `soundtrack` on the contract, so this is
  *    glmps-side cosmetic only and doesn't affect filter matching.
- * 2. Compound-slug fallback: `classical-folk` → `classical/folk`,
- *    `dnb-jungle` → `dnb/jungle`, `drone-noise` → `drone/noise`,
- *    `footwork-trap` → `footwork/trap`. Flat slugs pass through unchanged.
+ * 2. Slash-display: an explicit set of compound slugs renders with a slash
+ *    (`classical-folk` → `classical/folk`, `dnb-jungle` → `dnb/jungle`,
+ *    `drone-noise` → `drone/noise`, `footwork-trap` → `footwork/trap`).
+ *    Set-gated rather than a blind regex because `hip-hop` (v2.1.4) is a
+ *    single genre name that contains a hyphen and must render verbatim.
+ * 3. Everything else passes through unchanged.
  */
 const DISPLAY_OVERRIDES: Record<string, string> = {
   soundtrack: "film",
 };
 
+const SLASH_DISPLAY_SLUGS = new Set<string>([
+  "classical-folk",
+  "dnb-jungle",
+  "drone-noise",
+  "footwork-trap",
+]);
+
 export function genreLabel(slug: string): string {
-  return DISPLAY_OVERRIDES[slug] ?? slug.replace(/-/g, "/");
+  const override = DISPLAY_OVERRIDES[slug];
+  if (override) return override;
+  return SLASH_DISPLAY_SLUGS.has(slug) ? slug.replace(/-/g, "/") : slug;
 }
 
 /**

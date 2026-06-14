@@ -13,6 +13,13 @@ the contract verbatim; ndisc wins on any discrepancy. A change to the emitted
 event format is a coordinated `release.vN+1.json` bump — never an edit to a
 shipped version.
 
+### release.v2 — re-vendored 2026-06-14 (post v2.1.4) + v2.1.3 palette amendment + v2.1.2 catch-up
+
+- v2.1.4 amendment (2026-06-14): four new genre slugs — `ambient` and `hip-hop` to mains, `bass` and `house` to electronic subs. Slug count goes 18 → 22. All slugs remain pure peers. Palette triplets added: `--c-g-ambient: 176 199 209`, `--c-g-hip-hop: 158 104 66`, `--c-g-bass: 120 40 108`, `--c-g-house: 190 80 188`. SHA re-pin: `dac8a702…` (was `82c97da7…`).
+- **`genreLabel` fix:** the previous blind `slug.replace(/-/g, "/")` mangled `hip-hop` into `hip/hop`. Switched to a set-gated helper — `SLASH_DISPLAY_SLUGS` enumerates the four legitimate compound slugs (`classical-folk`, `dnb-jungle`, `drone-noise`, `footwork-trap`); all other slugs pass through verbatim. `hip-hop` and `bass`/`house`/`ambient` render unchanged.
+- No migration. Existing releases untouched; new slugs simply available.
+- Aggregation unchanged — any-slot counts everywhere per `visualisations.md`.
+
 ### release.v2 — re-vendored 2026-06-12 (post v2.1.2) + v2.1.3 palette amendment
 
 - Source: [xjmzx/ndisc @ main](https://github.com/xjmzx/ndisc/blob/main/schema/release.v2.json) (converged end-state per `schema/README.md`, heading "v2.1.3, 2026-06-12").
