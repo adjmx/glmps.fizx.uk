@@ -4,6 +4,7 @@ import { OwnerProfileProvider } from "@/hooks/useOwnerProfile";
 import { ReactionsProvider } from "@/hooks/useReactions";
 import Index from "./pages/Index";
 import Release from "./pages/Release";
+import Stats from "./pages/Stats";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/stats" element={<Stats />} />
               <Route path="/r/:naddr" element={<Release />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

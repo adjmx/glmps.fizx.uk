@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import AnimatedTitle from "@/components/AnimatedTitle";
 import StatsSummary from "@/components/StatsSummary";
-import GenreBar from "@/components/GenreBar";
 import ReleaseCard from "@/components/ReleaseCard";
 import ReleaseRow from "@/components/ReleaseRow";
 import FilterBar from "@/components/FilterBar";
@@ -102,29 +101,28 @@ export default function Index() {
       <Nav />
       <main className="container max-w-5xl py-8 sm:py-12">
         <div className="mb-8">
-          {/* Header — hero card: [title | relays | discography / search] | labels */}
+          {/* Header — hero card: [title | relays | discography] | labels.
+              Genre key + bar moved to the /stats page. */}
           <div className="bg-card border border-border">
             <div className="flex flex-col sm:flex-row sm:divide-x divide-border">
               {/* Left half: top row (title | relays | stats) + search row */}
               <div className="flex-1 min-w-0 flex flex-col">
-                <div className="min-h-[110px] grid grid-cols-1 sm:grid-cols-[14rem_1fr_13rem] divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
-                  <div className="px-4 py-3 min-w-0 flex flex-col justify-center">
-                    <div className="flex items-start gap-1.5">
-                      <AnimatedTitle
-                        accent="glmps"
-                        rest=""
-                        from="#34d399"
-                        to="#a78bfa"
-                        suffixRgba="rgba(52,211,153,0.55)"
-                        fontSize="clamp(28px, 5vw, 40px)"
-                      />
-                      <span className="mt-2.5 inline-block rounded-full border border-accent text-accent font-mono text-[10px] px-2 py-0.5 shrink-0">
-                        31237
-                      </span>
-                    </div>
+                <div className="min-h-[110px] grid grid-cols-1 sm:grid-cols-[10rem_minmax(0,1fr)_10rem] divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
+                  <div className="px-4 py-3 min-w-0 flex flex-col justify-center whitespace-nowrap gap-1">
+                    <AnimatedTitle
+                      accent="glmps"
+                      rest=""
+                      from="#34d399"
+                      to="#a78bfa"
+                      suffixRgba="rgba(52,211,153,0.55)"
+                      fontSize="clamp(28px, 5vw, 40px)"
+                    />
+                    <span className="self-start rounded-full border border-accent text-accent font-mono text-[10px] px-2 py-0.5">
+                      31237
+                    </span>
                   </div>
                   {hex && (
-                    <div className="px-4 py-3 font-mono flex flex-col justify-center">
+                    <div className="px-4 py-3 font-mono flex flex-col justify-center min-w-0">
                       <RelayStats
                         urls={DEFAULT_RELAYS}
                         filter={{ kinds: [RELEASE_KIND], authors: [hex] }}
@@ -194,15 +192,6 @@ export default function Index() {
                 </div>
               )}
             </div>
-            {/* Hero final row — primary-genre composition. Sits inside the
-                hero card so it can't be occluded by filter-bar dropdowns
-                opening below. Sub-linear (k=0.5) allocation keeps the long
-                tail readable; filter-aware via `visible`. */}
-            {hex && visible.some((r) => r.genres.length > 0) && (
-              <div className="border-t border-border p-3">
-                <GenreBar releases={visible} />
-              </div>
-            )}
           </div>
         </div>
 
