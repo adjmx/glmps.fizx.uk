@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import Nav from "@/components/Nav";
 import ReactionSummary from "@/components/ReactionSummary";
+import { LeafDots } from "@/components/LeafDots";
 import { hostnameOf, naddrDecode, type Release } from "@/lib/nostr";
 import { useReleaseByAddr } from "@/hooks/useReleaseByAddr";
 import { useLabelLibrary, imageForLabel } from "@/hooks/useLabelLibrary";
@@ -122,7 +123,16 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         <Field label="medium" value={release.medium} />
         <Field label="format" value={release.format} />
         <Field label="year" value={release.year} />
-        <Field label="tracks" value={release.tracks ? String(release.tracks) : undefined} />
+        {release.tracks ? (
+          <div className="flex gap-3">
+            <dt className="text-[10px] uppercase tracking-widest text-muted-foreground/50 w-20 mt-1 shrink-0">
+              tracks
+            </dt>
+            <dd className="text-sm mt-1">
+              <LeafDots n={release.tracks} />
+            </dd>
+          </div>
+        ) : null}
         <Field label="label" value={release.label} />
         <Field label="catalog" value={release.catalog} />
         <Field label="country" value={release.country} />
