@@ -65,6 +65,8 @@ check(
     v2full?.genres[1] === "dub" &&
     v2full?.genres[2] === "downtempo",
 );
+// release.v2 additive: the `tracks` tag parses to a number.
+check("v2 full: tracks parsed = 12", v2full?.tracks === 12);
 
 // release.v2 — partial fixture has only the primary slot.
 const v2partial = parseRelease(load("release-31237-v2.partial.json"));

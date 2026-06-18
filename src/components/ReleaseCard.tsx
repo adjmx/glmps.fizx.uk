@@ -20,7 +20,13 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
   const addr = `${RELEASE_KIND}:${release.pubkey}:${release.d}`;
   const { forAddr } = useReactions();
   const { up, down, info } = forAddr(addr);
-  const facets = [release.year, release.formatGroup, release.label, release.country]
+  const facets = [
+    release.year,
+    release.formatGroup,
+    release.tracks ? `${release.tracks} tracks` : undefined,
+    release.label,
+    release.country,
+  ]
     .filter(Boolean)
     .join(" · ");
 

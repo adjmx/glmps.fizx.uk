@@ -61,6 +61,12 @@ export default function ReleaseRow({ release }: Props) {
               <span className="truncate">{release.formatGroup}</span>
             </>
           )}
+          {release.tracks != null && (
+            <>
+              <span className="opacity-40">·</span>
+              <span>{release.tracks} tracks</span>
+            </>
+          )}
           {release.label && (
             <>
               <span className="opacity-40">·</span>

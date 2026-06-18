@@ -13,6 +13,14 @@ the contract verbatim; ndisc wins on any discrepancy. A change to the emitted
 event format is a coordinated `release.vN+1.json` bump — never an edit to a
 shipped version.
 
+### release.v2 — `tracks` tag amendment, re-vendored 2026-06-18
+
+- Source: [xjmzx/ndisc @ main](https://github.com/xjmzx/ndisc/blob/main/schema/release.v2.json).
+- `schema/release.v2.json` SHA-256 `bd76512c7d6bdce91e2cc55ba3f24f70e51cfef031a843a7a5a8aa84e312c322` (was `dac8a702…` at v2.1.4).
+- Adds the `tracks` tag — optional, integer-as-string: the release's **expected total track count** (from the source `TRACKTOTAL` metadata). A release property, NOT a per-device present-file count. Additive + backward-compatible (old consumers ignore it); a tolerated additive amendment to v2 (like the genre-slug additions), **not** a v3 bump — ndisc's `changePolicy` was updated to bless additive optional tags.
+- Parser: `parseRelease` reads `tracks` → `Release.tracks?: number` (strict-but-recoverable — a non-positive/garbage value drops out). Shown as an "N tracks" facet on the card/row + a `tracks` field on the detail page.
+- Fixture `release-31237-v2.full.json` gains `["tracks","12"]`; `assert-parse.ts` pins `tracks === 12`.
+
 ### release.v2 — re-vendored 2026-06-14 (post v2.1.4) + v2.1.3 palette amendment + v2.1.2 catch-up
 
 - v2.1.4 amendment (2026-06-14): four new genre slugs — `ambient` and `hip-hop` to mains, `bass` and `house` to electronic subs. Slug count goes 18 → 22. All slugs remain pure peers. Palette triplets added: `--c-g-ambient: 176 199 209`, `--c-g-hip-hop: 158 104 66`, `--c-g-bass: 120 40 108`, `--c-g-house: 190 80 188`. SHA re-pin: `dac8a702…` (was `82c97da7…`).

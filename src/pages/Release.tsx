@@ -70,7 +70,14 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
           {release.title}
         </h1>
         <div className="text-xs sm:text-sm text-muted-foreground">
-          {[release.year, release.medium, release.formatGroup, release.label, release.country]
+          {[
+            release.year,
+            release.medium,
+            release.formatGroup,
+            release.tracks ? `${release.tracks} tracks` : undefined,
+            release.label,
+            release.country,
+          ]
             .filter(Boolean)
             .join(" · ")}
         </div>
@@ -115,6 +122,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
         <Field label="medium" value={release.medium} />
         <Field label="format" value={release.format} />
         <Field label="year" value={release.year} />
+        <Field label="tracks" value={release.tracks ? String(release.tracks) : undefined} />
         <Field label="label" value={release.label} />
         <Field label="catalog" value={release.catalog} />
         <Field label="country" value={release.country} />
