@@ -9,3 +9,9 @@ dist-ssr
 .vscode
 .idea
 .tracker-state.json
+
+# build artifacts / incremental caches
+*.tsbuildinfo
+
+# local agent/session dir
+.claude/
