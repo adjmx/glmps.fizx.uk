@@ -9,8 +9,7 @@ import {
   type Release,
 } from "@/lib/nostr";
 import {
-  GENRE_ELECTRONIC_SUBS,
-  GENRE_MAINS,
+  GENRE_ORDER,
   genreLabel,
 } from "@/lib/genre";
 
@@ -136,19 +135,15 @@ export default function FilterBar({ releases, value, onChange, rightSlot }: Prop
           .sort(),
       ],
       decade: DECADE_ORDER.filter((d) => decadeSet.has(d)),
-      // Schema-defined order: mains first, then electronic subs. Any unknown
-      // slug shouldn't reach here (normaliseGenres drops them on parse), but
-      // appended alphabetically as a safety net.
+      // Schema-defined order: acoustic → electronic → bridge → tertiary. Any
+      // unknown/deprecated slug shouldn't normally reach here (normaliseGenres
+      // keeps deprecated pairs but drops unknowns), but is appended
+      // alphabetically as a safety net so dirty/legacy data stays selectable.
       genre: [
-        ...GENRE_MAINS.filter((g) => genreSet.has(g)),
-        ...GENRE_ELECTRONIC_SUBS.filter((g) => genreSet.has(g)),
+        ...GENRE_ORDER.filter((g) => genreSet.has(g)),
         ...Array.from(genreSet)
           .filter(
-            (g) =>
-              !GENRE_MAINS.includes(g as (typeof GENRE_MAINS)[number]) &&
-              !GENRE_ELECTRONIC_SUBS.includes(
-                g as (typeof GENRE_ELECTRONIC_SUBS)[number],
-              ),
+            (g) => !GENRE_ORDER.includes(g as (typeof GENRE_ORDER)[number]),
           )
           .sort(),
       ],

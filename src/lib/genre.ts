@@ -1,77 +1,115 @@
 /**
  * release.v2 genre slug constants + helpers.
  *
- * Source of truth: schema/release.v2.json — keep this file in sync with
- * `genreSlugs.mains` and `genreSlugs.electronicSubs`. Validation policy
- * matches the schema's strict-but-recoverable posture: unknown slugs are
- * dropped silently, never thrown.
+ * Source of truth: schema/release.v2.json — keep this file in sync with the
+ * grouped `genreSlugs` (acoustic / electronic / bridge / tertiary). The
+ * grouping is semantic + palette ONLY — not a hierarchy; all 35 active slugs
+ * are pure peers. Validation matches the schema's strict-but-recoverable
+ * posture: unknown slugs are dropped silently, never thrown.
+ *
+ * The four original compound slash-pairs were retired in the 2026-06
+ * restructure (split/collapsed into atomic slugs). They live on in
+ * GENRE_DEPRECATED: never emitted on new events, but still VALID for reading
+ * legacy events and cross-relay copies, where they render with a slash (see
+ * genreLabel).
  */
 
-export const GENRE_MAINS = [
+// Primary / acoustic family — muted, earthy.
+export const GENRE_ACOUSTIC = [
   "ambient",
-  "classical-folk",
-  "downtempo",
-  "electronic",
+  "blues",
+  "classical",
   "experimental",
+  "folk",
   "funk",
   "hip-hop",
   "jazz",
+  "latin",
+  "metal",
   "pop",
+  "poetry",
   "reggae",
+  "rnb",
   "rock",
+  "soul",
   "soundtrack",
 ] as const;
 
-export const GENRE_ELECTRONIC_SUBS = [
+// Secondary / electronic family — vivid, spread across the hue wheel.
+export const GENRE_ELECTRONIC = [
   "acid",
   "bass",
   "breaks",
-  "dnb-jungle",
-  "drone-noise",
-  "dub",
+  "dnb",
+  "downtempo",
   "electro",
-  "footwork-trap",
+  "electronic",
+  "footwork",
   "house",
+  "jungle",
   "techno",
 ] as const;
 
-export type GenreMain = (typeof GENRE_MAINS)[number];
-export type GenreElectronicSub = (typeof GENRE_ELECTRONIC_SUBS)[number];
-export type GenreSlug = GenreMain | GenreElectronicSub;
+// Bridge — sit between the acoustic and electronic families, own hues.
+export const GENRE_BRIDGE = ["dub", "noise"] as const;
 
+// Tertiary / optional — cross-cutting styles.
+export const GENRE_TERTIARY = [
+  "boom-bap",
+  "lo-fi",
+  "spiritual",
+  "trance",
+  "trap",
+] as const;
+
+// Retired compound pairs — never emitted; valid for legacy reads only.
+export const GENRE_DEPRECATED = [
+  "classical-folk",
+  "dnb-jungle",
+  "drone-noise",
+  "footwork-trap",
+] as const;
+
+// Picker / display order: acoustic → electronic → bridge → tertiary.
+export const GENRE_ORDER = [
+  ...GENRE_ACOUSTIC,
+  ...GENRE_ELECTRONIC,
+  ...GENRE_BRIDGE,
+  ...GENRE_TERTIARY,
+] as const;
+
+export type GenreSlug =
+  | (typeof GENRE_ORDER)[number]
+  | (typeof GENRE_DEPRECATED)[number];
+
+// Readable set = active (emittable) + deprecated (legacy-only).
 const KNOWN: ReadonlySet<string> = new Set<string>([
-  ...GENRE_MAINS,
-  ...GENRE_ELECTRONIC_SUBS,
+  ...GENRE_ORDER,
+  ...GENRE_DEPRECATED,
 ]);
-const SUBS: ReadonlySet<string> = new Set<string>(GENRE_ELECTRONIC_SUBS);
 
 export function isGenreSlug(s: string): s is GenreSlug {
   return KNOWN.has(s);
 }
 
-export function isElectronicSub(s: string): s is GenreElectronicSub {
-  return SUBS.has(s);
-}
-
 /**
  * Wire-to-display rule for human-facing UI.
  *
- * 1. Per-slug overrides (rare): the wire keeps the schema-canonical slug;
- *    only the displayed label changes. Used here so `soundtrack` reads as
- *    "film" — the slug stays `soundtrack` on the contract, so this is
- *    glmps-side cosmetic only and doesn't affect filter matching.
- * 2. Slash-display: an explicit set of compound slugs renders with a slash
- *    (`classical-folk` → `classical/folk`, `dnb-jungle` → `dnb/jungle`,
- *    `drone-noise` → `drone/noise`, `footwork-trap` → `footwork/trap`).
- *    Set-gated rather than a blind regex because `hip-hop` (v2.1.4) is a
- *    single genre name that contains a hyphen and must render verbatim.
+ * 1. Per-slug overrides: the wire keeps the schema-canonical slug; only the
+ *    displayed label changes. `soundtrack` reads as "film" (glmps-side
+ *    cosmetic — doesn't affect filter matching) and `rnb` reads as "R&B".
+ * 2. Legacy slash-display: the retired compound pairs render with a slash
+ *    (`classical-folk` → `classical/folk`, etc.) when encountered in legacy
+ *    events. Set-gated, not a blind regex, so atomic hyphen slugs like
+ *    `hip-hop`, `lo-fi`, and `boom-bap` render verbatim.
  * 3. Everything else passes through unchanged.
  */
 const DISPLAY_OVERRIDES: Record<string, string> = {
   soundtrack: "film",
+  rnb: "R&B",
 };
 
-const SLASH_DISPLAY_SLUGS = new Set<string>([
+const LEGACY_SLASH = new Set<string>([
   "classical-folk",
   "dnb-jungle",
   "drone-noise",
@@ -81,7 +119,7 @@ const SLASH_DISPLAY_SLUGS = new Set<string>([
 export function genreLabel(slug: string): string {
   const override = DISPLAY_OVERRIDES[slug];
   if (override) return override;
-  return SLASH_DISPLAY_SLUGS.has(slug) ? slug.replace(/-/g, "/") : slug;
+  return LEGACY_SLASH.has(slug) ? slug.replace(/-/g, "/") : slug;
 }
 
 /**
@@ -89,9 +127,8 @@ export function genreLabel(slug: string): string {
  * recoverable — unknown slugs dropped, duplicates collapsed to first
  * occurrence, capped at 3 slots, slot order preserved.
  *
- * v2.1 update: the cross-slot `noParentWithOwnSub` rule was removed from
- * the contract. All 18 slugs are pure peers — `electronic` + a sub may
- * coexist on the same event. We no longer drop one for the other.
+ * All slugs are pure peers — no parent/sub gating. Deprecated compound pairs
+ * still parse (they're in KNOWN) so legacy events keep their genres.
  */
 export function normaliseGenres(raw: readonly string[]): GenreSlug[] {
   const out: GenreSlug[] = [];
