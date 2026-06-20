@@ -76,6 +76,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
             release.medium,
             release.formatGroup,
             release.tracks ? `${release.tracks} tracks` : undefined,
+            release.discs && release.discs > 1 ? `${release.discs} discs` : undefined,
             release.label,
             release.country,
           ]
@@ -133,6 +134,14 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
             </dd>
           </div>
         ) : null}
+        <Field
+          label="discs"
+          value={
+            release.discs && release.discs > 1
+              ? String(release.discs)
+              : undefined
+          }
+        />
         <Field label="label" value={release.label} />
         <Field label="catalog" value={release.catalog} />
         <Field label="country" value={release.country} />

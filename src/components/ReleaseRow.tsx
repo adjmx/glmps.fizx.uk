@@ -67,6 +67,12 @@ export default function ReleaseRow({ release }: Props) {
               <span>{release.tracks} tracks</span>
             </>
           )}
+          {release.discs != null && release.discs > 1 && (
+            <>
+              <span className="opacity-40">·</span>
+              <span>{release.discs} discs</span>
+            </>
+          )}
           {release.label && (
             <>
               <span className="opacity-40">·</span>

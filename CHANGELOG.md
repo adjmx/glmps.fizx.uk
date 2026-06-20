@@ -13,6 +13,14 @@ the contract verbatim; ndisc wins on any discrepancy. A change to the emitted
 event format is a coordinated `release.vN+1.json` bump — never an edit to a
 shipped version.
 
+### release.v2 — `discs` tag amendment, re-vendored 2026-06-20
+
+- Source: [xjmzx/ndisc @ 018eb34](https://github.com/xjmzx/ndisc/blob/018eb34/schema/release.v2.json).
+- `schema/release.v2.json` SHA-256 `179fd5631454aa6c8feac5b20a27257f96b73413953e663c52ae7516f6a843fd` (was `99a9b269…`, the 2026-06 genre restructure).
+- Adds the `discs` tag — optional, integer-as-string: the release's **total disc count**. A release property like `tracks`, NOT a per-device count. ndisc derives it from the Discogs format breakdown (2x LP → 2; digital folder imports carry no disc count), so it is present only on Discogs-enriched releases. Additive + backward-compatible (old consumers ignore it); a tolerated additive amendment to v2, **not** a v3 bump — `changePolicy` now blesses both the `tracks` and `discs` optional tags.
+- Parser: `parseRelease` reads `discs` → `Release.discs?: number` (strict-but-recoverable — a non-positive/garbage value drops out). Surfaced only for genuine multi-disc releases (`> 1`): an "N discs" facet on the card/row + a `discs` field on the detail page. ndisc emits when `> 0`; single-disc is kept off the UI.
+- Fixture `release-31237-v2.full.json` gains `["discs","2"]`; `assert-parse.ts` pins `discs === 2`.
+
 ### release.v2 — `tracks` tag amendment, re-vendored 2026-06-18
 
 - Source: [xjmzx/ndisc @ main](https://github.com/xjmzx/ndisc/blob/main/schema/release.v2.json).
