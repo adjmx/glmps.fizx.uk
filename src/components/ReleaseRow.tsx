@@ -5,6 +5,7 @@ import { useReactions } from "@/hooks/useReactions";
 import { displayCount } from "@/lib/rating";
 import StarRow from "./StarRow";
 import OwnerNaddrCopy from "./OwnerNaddrCopy";
+import SourceDot from "./SourceDot";
 
 type Props = { release: Release };
 
@@ -87,6 +88,7 @@ export default function ReleaseRow({ release }: Props) {
             <StarRow up={up} down={down} size="xs" showWhenUnrated />
             {info > 0 && <span className="opacity-60">+{displayCount(info)}</span>}
           </span>
+          <SourceDot release={release} />
           <span className="w-12 text-right text-[9px] uppercase tracking-widest text-muted-foreground/40 shrink-0">
             {release.medium === "physical" ? "physical" : "digital"}
           </span>

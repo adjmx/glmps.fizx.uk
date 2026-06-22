@@ -4,6 +4,7 @@ import Nav from "@/components/Nav";
 import ReactionSummary from "@/components/ReactionSummary";
 import { LeafDots } from "@/components/LeafDots";
 import { hostnameOf, naddrDecode, type Release } from "@/lib/nostr";
+import { sourcePlatform } from "@/lib/source";
 import { useReleaseByAddr } from "@/hooks/useReleaseByAddr";
 import { useLabelLibrary, imageForLabel } from "@/hooks/useLabelLibrary";
 import { genreLabel, type GenreSlug } from "@/lib/genre";
@@ -83,18 +84,22 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
             .filter(Boolean)
             .join(" · ")}
         </div>
-        {release.source && hostnameOf(release.source) && (
-          <div className="text-xs">
-            <a
-              href={release.source}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-muted-foreground/70 hover:text-primary transition-colors"
-            >
-              view on {hostnameOf(release.source)} ↗
-            </a>
-          </div>
-        )}
+        {release.source && hostnameOf(release.source) && (() => {
+          const platform = sourcePlatform(release);
+          return (
+            <div className="text-xs">
+              <a
+                href={release.source}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-muted-foreground/70 hover:text-primary transition-colors"
+                style={platform ? { color: platform.color } : undefined}
+              >
+                view on {platform?.label ?? hostnameOf(release.source)} ↗
+              </a>
+            </div>
+          );
+        })()}
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[24rem_16rem] gap-6 items-start">

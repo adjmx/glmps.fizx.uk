@@ -7,6 +7,7 @@ import { displayCount } from "@/lib/rating";
 import StarRow from "./StarRow";
 import OwnerNaddrCopy from "./OwnerNaddrCopy";
 import GenreDotChip from "./GenreDotChip";
+import SourceDot from "./SourceDot";
 
 export type CardDensity = "default" | "sm";
 
@@ -44,7 +45,7 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
       )}
     >
       <div className="relative aspect-square bg-gradient-to-br from-muted/40 to-card flex items-center justify-center text-muted-foreground/30 text-xs">
-        <div className="absolute top-1.5 left-1.5 z-10">
+        <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1">
           <span
             title={isPhysical ? "physical release" : "digital release"}
             className={cn(
@@ -73,6 +74,10 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
             </svg>
             {!isSm && (isPhysical ? "physical" : "digital")}
           </span>
+          <SourceDot
+            release={release}
+            className="rounded border border-border bg-card/80 backdrop-blur-sm p-0.5"
+          />
         </div>
         <div className="absolute top-1.5 right-1.5 z-10 flex gap-1">
           <OwnerNaddrCopy naddr={naddr} />
