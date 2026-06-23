@@ -23,6 +23,12 @@ shipped version.
 - Surfaced as the **/current** view — kind:31239 notes matched against the discography; a note's `a` hydrates artist/title/cover from the local kind:31237, linking to the release. Owner-only in v1.
 - Coordinated wave with ndisc.view + the other glmps fork — all consumers + ndisc cite the same SHA.
 
+### release.v2 — 2026-06b genre round, re-vendored 2026-06-23
+
+- Source: [xjmzx/ndisc @ 28cc116](https://github.com/xjmzx/ndisc). `schema/release.v2.json` SHA-256 `179fd563…` → `91e16cf1…` (re-pinned + freeze-checked). Additive, **not** a v3 bump.
+- Genre vocabulary 35 → **38 active slugs**. Two 1:1 renames done additively (new slug active, old retired to `deprecated`, kept valid for legacy reads): **`poetry` → `spoken`**, **`spiritual` → `conscious`**. New slugs: **`disco`** + **`spoken`** (acoustic), **`garage`** (electronic), **`conscious`** + **`turntablism`** (tertiary).
+- `genre.ts` slug arrays updated (viewer helpers `genreLabel`/`genreColor`/`normaliseGenres` unchanged); `index.css` gains `--c-g-{disco,spoken,garage,conscious,turntablism}` hue vars (disco orchid, spoken lavender, garage sky-blue, conscious gold-olive, turntablism graphite). `poetry`/`spiritual` colours retained for legacy rendering.
+
 ### release.v2 — `discs` tag amendment, re-vendored 2026-06-20
 
 - Source: [xjmzx/ndisc @ 018eb34](https://github.com/xjmzx/ndisc/blob/018eb34/schema/release.v2.json).

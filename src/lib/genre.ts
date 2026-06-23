@@ -3,7 +3,7 @@
  *
  * Source of truth: schema/release.v2.json — keep this file in sync with the
  * grouped `genreSlugs` (acoustic / electronic / bridge / tertiary). The
- * grouping is semantic + palette ONLY — not a hierarchy; all 35 active slugs
+ * grouping is semantic + palette ONLY — not a hierarchy; all 38 active slugs
  * are pure peers. Validation matches the schema's strict-but-recoverable
  * posture: unknown slugs are dropped silently, never thrown.
  *
@@ -19,6 +19,7 @@ export const GENRE_ACOUSTIC = [
   "ambient",
   "blues",
   "classical",
+  "disco",
   "experimental",
   "folk",
   "funk",
@@ -27,12 +28,12 @@ export const GENRE_ACOUSTIC = [
   "latin",
   "metal",
   "pop",
-  "poetry",
   "reggae",
   "rnb",
   "rock",
   "soul",
   "soundtrack",
+  "spoken",
 ] as const;
 
 // Secondary / electronic family — vivid, spread across the hue wheel.
@@ -45,6 +46,7 @@ export const GENRE_ELECTRONIC = [
   "electro",
   "electronic",
   "footwork",
+  "garage",
   "house",
   "jungle",
   "techno",
@@ -56,18 +58,23 @@ export const GENRE_BRIDGE = ["dub", "noise"] as const;
 // Tertiary / optional — cross-cutting styles.
 export const GENRE_TERTIARY = [
   "boom-bap",
+  "conscious",
   "lo-fi",
-  "spiritual",
   "trance",
   "trap",
+  "turntablism",
 ] as const;
 
-// Retired compound pairs — never emitted; valid for legacy reads only.
+// Retired slugs — never emitted; valid for legacy reads only. The four compound
+// slash-pairs (display with a slash) plus the 2026-06b 1:1 renames poetry and
+// spiritual (display verbatim; remapped to spoken / conscious).
 export const GENRE_DEPRECATED = [
   "classical-folk",
   "dnb-jungle",
   "drone-noise",
   "footwork-trap",
+  "poetry",
+  "spiritual",
 ] as const;
 
 // Picker / display order: acoustic → electronic → bridge → tertiary.

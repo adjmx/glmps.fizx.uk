@@ -60,6 +60,12 @@
     --c-g-spiritual:     178 118  56;
     --c-g-trance:        120 100 245;
     --c-g-trap:          128  84  96;
+    /* 2026-06b genre round — disco/spoken (acoustic), garage (electronic), conscious/turntablism (tertiary) */
+    --c-g-disco:         214 110 168;
+    --c-g-spoken:        156 146 178;
+    --c-g-garage:         96 186 224;
+    --c-g-conscious:     156 138  84;
+    --c-g-turntablism:   116 120 134;
     /* deprecated compound pairs — legacy reads only, render with slash */
     --c-g-classical-folk:232 220 195;
     --c-g-dnb-jungle:    160  39 135;
