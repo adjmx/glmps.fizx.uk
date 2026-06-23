@@ -63,6 +63,15 @@ export default function ReleasePage() {
 
 function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) {
   const addr = `${RELEASE_KIND}:${release.pubkey}:${release.d}`;
+  // Drop the bare "discogs.com" source link when a Discogs external-id pill
+  // already covers it — keep the canonical pill, lose the redundant link.
+  const hasDiscogsId = release.externalIds.some(
+    (i) => externalRef(i)?.kind === "discogs",
+  );
+  const showSource =
+    !!release.source &&
+    !!hostnameOf(release.source) &&
+    !(hostnameOf(release.source) === "discogs.com" && hasDiscogsId);
   return (
     <article className="space-y-6">
       <header className="space-y-2">
@@ -85,7 +94,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
             .filter(Boolean)
             .join(" · ")}
         </div>
-        {release.source && hostnameOf(release.source) && (() => {
+        {showSource && (() => {
           const platform = sourcePlatform(release);
           return (
             <div className="text-xs">
@@ -177,27 +186,29 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-2">
             external ids
           </div>
-          <ul className="text-xs font-mono text-muted-foreground space-y-1">
+          <div className="flex flex-wrap gap-2">
             {release.externalIds.map((i) => {
               const ref = externalRef(i);
-              return (
-                <li key={i}>
-                  {ref ? (
-                    <a
-                      href={ref.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors"
-                    >
-                      {ref.label} ↗
-                    </a>
-                  ) : (
-                    i
-                  )}
-                </li>
+              return ref ? (
+                <a
+                  key={i}
+                  href={ref.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md bg-white/10 hover:bg-white/[0.16] px-2 py-1 text-[11px] font-mono text-white/75 hover:text-white transition-colors"
+                >
+                  {ref.label} ↗
+                </a>
+              ) : (
+                <span
+                  key={i}
+                  className="inline-flex items-center rounded-md bg-white/[0.06] px-2 py-1 text-[11px] font-mono text-white/45"
+                >
+                  {i}
+                </span>
               );
             })}
-          </ul>
+          </div>
         </div>
       )}
 
