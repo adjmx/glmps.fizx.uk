@@ -231,7 +231,7 @@ function LabelSlot({ label }: { label?: string }) {
   const { library } = useLabelLibrary();
   const url = imageForLabel(library, label);
   return (
-    <div className="w-full aspect-square rounded-lg border border-border/60 bg-card/30 flex items-center justify-center overflow-hidden">
+    <div className="w-full aspect-square rounded-lg border border-border/60 flex items-center justify-center overflow-hidden">
       {url ? (
         <img
           src={url}

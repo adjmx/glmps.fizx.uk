@@ -100,7 +100,7 @@ export default function LabelCycler({
     <div
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className={`rounded-lg border bg-card/30 overflow-hidden transition-colors font-mono ${
+      className={`rounded-lg border overflow-hidden transition-colors font-mono ${
         isActive
           ? "border-primary"
           : "border-border hover:border-primary/40"
