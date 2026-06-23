@@ -5,6 +5,7 @@ import { ReactionsProvider } from "@/hooks/useReactions";
 import Index from "./pages/Index";
 import Release from "./pages/Release";
 import Stats from "./pages/Stats";
+import Current from "./pages/Current";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/stats" element={<Stats />} />
+              <Route path="/current" element={<Current />} />
               <Route path="/r/:naddr" element={<Release />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -30,6 +30,16 @@ for v in v1 v2; do
   fi
 done
 
+# feed.v1 — the feed-note channel contract (kind:31239). Frozen + SHA-pinned,
+# same rule: a format change is a NEW feed.vN.json vendored from ndisc.
+if ! ( cd schema && shasum -a 256 -c "feed.v1.json.sha256" ); then
+  echo "[schema] FAIL — feed.v1.json no longer matches its pinned hash."
+  echo "         feed.v1 is FROZEN. Vendor the new contract from ndisc as"
+  echo "         feed.v<next>.json instead of editing it, then update the pin"
+  echo "         and CHANGELOG.md."
+  exit 1
+fi
+
 echo "[schema] parser conformance"
 npx --yes tsx scripts/assert-parse.ts
 
