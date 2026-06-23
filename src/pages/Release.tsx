@@ -95,17 +95,19 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
             .join(" · ")}
         </div>
         {showSource && (() => {
+          const src = release.source;
+          if (!src) return null;
           const platform = sourcePlatform(release);
           return (
             <div className="text-xs">
               <a
-                href={release.source}
+                href={src}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono text-muted-foreground/70 hover:text-primary transition-colors"
                 style={platform ? { color: platform.color } : undefined}
               >
-                view on {platform?.label ?? hostnameOf(release.source)} ↗
+                view on {platform?.label ?? hostnameOf(src)} ↗
               </a>
             </div>
           );
