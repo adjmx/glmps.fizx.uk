@@ -4,6 +4,7 @@ import Nav from "@/components/Nav";
 import ReactionSummary from "@/components/ReactionSummary";
 import { LeafDots } from "@/components/LeafDots";
 import { hostnameOf, naddrDecode, type Release } from "@/lib/nostr";
+import { externalRef } from "@/lib/nostr";
 import { sourcePlatform } from "@/lib/source";
 import { useReleaseByAddr } from "@/hooks/useReleaseByAddr";
 import { useLabelLibrary, imageForLabel } from "@/hooks/useLabelLibrary";
@@ -177,9 +178,25 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
             external ids
           </div>
           <ul className="text-xs font-mono text-muted-foreground space-y-1">
-            {release.externalIds.map((i) => (
-              <li key={i}>{i}</li>
-            ))}
+            {release.externalIds.map((i) => {
+              const ref = externalRef(i);
+              return (
+                <li key={i}>
+                  {ref ? (
+                    <a
+                      href={ref.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors"
+                    >
+                      {ref.label} ↗
+                    </a>
+                  ) : (
+                    i
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
