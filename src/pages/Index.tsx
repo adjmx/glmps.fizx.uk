@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Nav from "@/components/Nav";
 import AnimatedTitle from "@/components/AnimatedTitle";
 import StatsSummary from "@/components/StatsSummary";
@@ -9,6 +9,7 @@ import ViewToggle, { type ViewMode } from "@/components/ViewToggle";
 import RelayStats from "@/components/RelayStats";
 import LabelCycler from "@/components/LabelCycler";
 import SearchInput from "@/components/SearchInput";
+import DotMatrixLoader from "@/components/DotMatrixLoader";
 import { useReleases } from "@/hooks/useReleases";
 import { useLabelLibrary } from "@/hooks/useLabelLibrary";
 import { DEFAULT_RELAYS, OWNER_NPUB, RELEASE_KIND } from "@/config";
@@ -55,11 +56,14 @@ export default function Index() {
     }
   }, [view]);
 
-  // Reset pagination whenever the filter or result set changes — otherwise
-  // shrinking results to <shown leaves a dead "load more" button.
+  // Reset the scroll window when the FILTER changes (a narrower filter must
+  // start from the top). Deliberately NOT keyed on releases.length: while the
+  // feed streams in from relays, every batch would otherwise reset the window
+  // to 60 and fight the auto-advance. A shrinking set is handled gracefully by
+  // the slice below (paged just gets shorter; hasMore goes false).
   useEffect(() => {
     setShown(PAGE_SIZE);
-  }, [filters, releases.length]);
+  }, [filters]);
 
   const visible = useMemo(
     () => applyFilters(releases, filters),
@@ -67,6 +71,40 @@ export default function Index() {
   );
   const paged = useMemo(() => visible.slice(0, shown), [visible, shown]);
   const hasMore = visible.length > paged.length;
+
+  // Infinite scroll: a sentinel below the grid auto-advances the window when
+  // it nears the viewport — no click needed. Because the full discography is
+  // already in memory, we add a brief reveal beat so the loader registers and
+  // the scroll reads as a smooth glide rather than an instant snap.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [advancing, setAdvancing] = useState(false);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) setAdvancing(true);
+      },
+      { rootMargin: "200px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+    // Re-key on paged.length so the observer re-evaluates after each advance:
+    // observe() emits an immediate callback for the current state, so if the
+    // sentinel is still visible it keeps filling, and stops once it isn't —
+    // avoids the "sentinel stays in view, no transition, load stalls" trap.
+  }, [hasMore, view, paged.length]);
+
+  useEffect(() => {
+    if (!advancing) return;
+    const t = setTimeout(() => {
+      setShown((s) => Math.min(s + PAGE_SIZE, visible.length));
+      setAdvancing(false);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [advancing, visible.length]);
 
   // Gate the labels cell on whether the manifest will populate the
   // cycler. Until ndisc publishes labels.v1, this is false and the hero
@@ -214,7 +252,8 @@ export default function Index() {
             />
 
             {loading && !eose && (
-              <div className="text-xs text-muted-foreground/60 font-mono">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/60 font-mono">
+                <DotMatrixLoader />
                 loading from relays…
               </div>
             )}
@@ -250,24 +289,28 @@ export default function Index() {
                 </div>
               ))}
 
+            {/* Infinite-scroll sentinel + loader. The sentinel sits just below
+                the grid; when it nears the viewport the window advances. */}
             {hasMore && (
-              <div className="mt-6 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShown((s) =>
-                      Math.min(s + PAGE_SIZE, visible.length),
-                    )
-                  }
-                  className="font-mono text-[11px] px-4 py-2 border border-border rounded hover:border-primary/50 hover:text-primary transition-colors"
-                >
-                  load {Math.min(PAGE_SIZE, visible.length - paged.length)}{" "}
-                  more
-                  <span className="text-muted-foreground/40 ml-2">
-                    ({paged.length.toLocaleString()} /{" "}
-                    {visible.length.toLocaleString()})
-                  </span>
-                </button>
+              <div
+                ref={sentinelRef}
+                className="mt-6 flex flex-col items-center gap-2 py-4"
+              >
+                <DotMatrixLoader />
+                <span className="font-mono text-[10px] text-muted-foreground/40 tabular-nums">
+                  {paged.length.toLocaleString()} /{" "}
+                  {visible.length.toLocaleString()}
+                </span>
+              </div>
+            )}
+
+            {/* End marker — reached the true end of the filtered set. */}
+            {!hasMore && paged.length > 0 && (
+              <div className="mt-6 flex justify-center py-4">
+                <span className="font-mono text-[10px] text-muted-foreground/40 tabular-nums">
+                  that’s everything · {visible.length.toLocaleString()}{" "}
+                  {visible.length === 1 ? "release" : "releases"}
+                </span>
               </div>
             )}
 
