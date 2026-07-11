@@ -1,5 +1,35 @@
 # Changelog
 
+## Viewer behaviour
+
+Read-path fixes. These are *not* contract changes — the wire format is
+untouched — but they change what the viewer renders from the same events, so
+they move in step across both forks.
+
+### 2026-07-11 — `a`-tag deletions are not permanent tombstones
+
+A kind:5 deletion carrying an `a` tag was treated as killing the coordinate
+forever: any matching kind:31237 was dropped regardless of timestamp. But the
+coordinate (`kind:pubkey:d`) is **reused every time a release is republished**,
+so an unpublish-then-republish cycle produced a new event that the viewer
+discarded on sight.
+
+ndisc's library was bulk-unpublished and then republished, which leaves a
+deletion in the history of *every* coordinate. The consequence was not a stale
+release or two — as the deletion subscription caught up, the viewer would have
+dropped the **entire catalogue**.
+
+Now strict NIP-09: keep the newest deletion timestamp per coordinate and kill
+only events created at or before it. `e`-tag deletions remain permanent — they
+name one content-addressed event id, which is never reused. Fixed in
+`useReleases` (catalogue), `useReleaseByAddr` (release page) and `lib/feed`
+(kind:31239 notes, which carried the identical bare-`Set` tombstone and would
+have made any republished note invisible).
+
+Publisher-side counterpart: **ndisc v0.1.4-beta.5**, which had the same bug in
+`reconcile_published` and now also sends `e` + `a` on every deletion (see
+`HANDOVER-2026-07-11.md`).
+
 ## Schema contract
 
 The Nostr wire contract with **ndisc** (the desktop publisher) is vendored
