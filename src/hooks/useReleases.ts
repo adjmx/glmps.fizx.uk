@@ -66,12 +66,18 @@ export function useReleases(hexPubkey: string | undefined) {
       return deletedAt !== undefined && ev.created_at <= deletedAt;
     };
 
+    // Coalescing window (ms). Collapses the storm of onevent callbacks into a
+    // handful of recomputes per second. setTimeout (not rAF) so it still fires
+    // while the tab/webview is hidden — rAF pauses when the document isn't
+    // visible, which would leave the catalogue unrendered on a backgrounded
+    // load until the user returns.
+    const FLUSH_MS = 120;
     let flushScheduled = false;
-    let rafId: number | null = null;
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
     const flush = () => {
       flushScheduled = false;
-      rafId = null;
+      flushTimer = null;
       const releases: Release[] = [];
       for (const [d, ev] of latestRef.current) {
         if (isDeleted(ev)) continue;
@@ -82,15 +88,13 @@ export function useReleases(hexPubkey: string | undefined) {
       setState((s) => ({ ...s, releases }));
     };
 
-    // Coalesce the storm of onevent callbacks — thousands during initial sync,
-    // including every kind:5 deletion — into at most one recompute per frame.
     // The old code re-parsed and re-sorted the whole catalogue on every single
     // event, pinning the main thread; this keeps the download aggressive while
     // the UI stays responsive.
     const scheduleFlush = () => {
       if (flushScheduled) return;
       flushScheduled = true;
-      rafId = requestAnimationFrame(flush);
+      flushTimer = setTimeout(flush, FLUSH_MS);
     };
 
     const releasesSub = pool.subscribeMany(
@@ -138,7 +142,7 @@ export function useReleases(hexPubkey: string | undefined) {
     );
 
     return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (flushTimer !== null) clearTimeout(flushTimer);
       releasesSub.close();
       deletesSub.close();
       pool.close(relays);
