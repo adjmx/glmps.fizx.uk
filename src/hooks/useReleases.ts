@@ -23,6 +23,10 @@ export function useReleases(hexPubkey: string | undefined) {
 
   // Latest event per d-tag (NIP-01 replaceable dedupe)
   const latestRef = useRef<Map<string, NostrEvent>>(new Map());
+  // Parsed release per d-tag, cached at ingest so a recompute never re-parses
+  // the whole catalogue. Kept in lockstep with latestRef: parse once when an
+  // event wins the replaceable race; drop the entry if it fails to parse.
+  const parsedRef = useRef<Map<string, Release>>(new Map());
   // NIP-09 deletion state.
   // `e`-tag deletes name a specific event id (content-addressed), so they are
   // permanent: that exact event is dead forever.
@@ -43,6 +47,7 @@ export function useReleases(hexPubkey: string | undefined) {
   useEffect(() => {
     if (!hexPubkey) return;
     latestRef.current = new Map();
+    parsedRef.current = new Map();
     deletedIdsRef.current = new Set();
     deletedAddrsRef.current = new Map();
     setState({ releases: [], loading: true, eose: false });
@@ -61,15 +66,31 @@ export function useReleases(hexPubkey: string | undefined) {
       return deletedAt !== undefined && ev.created_at <= deletedAt;
     };
 
-    const recompute = () => {
+    let flushScheduled = false;
+    let rafId: number | null = null;
+
+    const flush = () => {
+      flushScheduled = false;
+      rafId = null;
       const releases: Release[] = [];
-      for (const ev of latestRef.current.values()) {
+      for (const [d, ev] of latestRef.current) {
         if (isDeleted(ev)) continue;
-        const parsed = parseRelease(ev);
+        const parsed = parsedRef.current.get(d);
         if (parsed) releases.push(parsed);
       }
       releases.sort(compareReleases);
       setState((s) => ({ ...s, releases }));
+    };
+
+    // Coalesce the storm of onevent callbacks — thousands during initial sync,
+    // including every kind:5 deletion — into at most one recompute per frame.
+    // The old code re-parsed and re-sorted the whole catalogue on every single
+    // event, pinning the main thread; this keeps the download aggressive while
+    // the UI stays responsive.
+    const scheduleFlush = () => {
+      if (flushScheduled) return;
+      flushScheduled = true;
+      rafId = requestAnimationFrame(flush);
     };
 
     const releasesSub = pool.subscribeMany(
@@ -82,7 +103,10 @@ export function useReleases(hexPubkey: string | undefined) {
           const current = latestRef.current.get(dTag);
           if (!isNewerReplaceable(current, ev)) return;
           latestRef.current.set(dTag, ev);
-          recompute();
+          const parsed = parseRelease(ev);
+          if (parsed) parsedRef.current.set(dTag, parsed);
+          else parsedRef.current.delete(dTag);
+          scheduleFlush();
         },
         oneose() {
           setState((s) => ({ ...s, loading: false, eose: true }));
@@ -108,12 +132,13 @@ export function useReleases(hexPubkey: string | undefined) {
               }
             }
           }
-          if (touched) recompute();
+          if (touched) scheduleFlush();
         },
       },
     );
 
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       releasesSub.close();
       deletesSub.close();
       pool.close(relays);

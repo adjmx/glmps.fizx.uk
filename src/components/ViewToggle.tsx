@@ -1,8 +1,9 @@
 import { cn } from "@/lib/cn";
 
-// View modes — extended with `grid-sm` for tighter grid density on larger
-// screens. `grid-xs` is reserved for a future iteration (thumbnail-only).
-export type ViewMode = "grid" | "grid-sm" | "list";
+// View modes — `grid-sm` tightens grid density on larger screens; `grid-xs`
+// is the image-only cover wall (artwork + a tiny medium dot, no text — all
+// details live on the expanded release page).
+export type ViewMode = "grid" | "grid-sm" | "grid-xs" | "list";
 
 type Props = {
   value: ViewMode;
@@ -13,7 +14,7 @@ type Props = {
 // primary→accent gradient FilterBar uses on its facet row, so the whole
 // control band reads as one tinted strip.
 const inactiveColor = (i: number): string => {
-  const pct = (i / 2) * 100;
+  const pct = (i / 3) * 100;
   return `color-mix(in oklch, hsl(var(--primary)), hsl(var(--accent)) ${pct}%)`;
 };
 
@@ -52,10 +53,35 @@ export default function ViewToggle({ value, onChange }: Props) {
         </svg>
       </ToggleBtn>
       <ToggleBtn
+        active={value === "grid-xs"}
+        onClick={() => onChange("grid-xs")}
+        label="cover wall"
+        gradientColor={inactiveColor(2)}
+      >
+        <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
+          <rect x="0.5" y="0.5" width="2" height="2" rx="0.25" />
+          <rect x="3.5" y="0.5" width="2" height="2" rx="0.25" />
+          <rect x="6.5" y="0.5" width="2" height="2" rx="0.25" />
+          <rect x="9.5" y="0.5" width="2" height="2" rx="0.25" />
+          <rect x="0.5" y="3.5" width="2" height="2" rx="0.25" />
+          <rect x="3.5" y="3.5" width="2" height="2" rx="0.25" />
+          <rect x="6.5" y="3.5" width="2" height="2" rx="0.25" />
+          <rect x="9.5" y="3.5" width="2" height="2" rx="0.25" />
+          <rect x="0.5" y="6.5" width="2" height="2" rx="0.25" />
+          <rect x="3.5" y="6.5" width="2" height="2" rx="0.25" />
+          <rect x="6.5" y="6.5" width="2" height="2" rx="0.25" />
+          <rect x="9.5" y="6.5" width="2" height="2" rx="0.25" />
+          <rect x="0.5" y="9.5" width="2" height="2" rx="0.25" />
+          <rect x="3.5" y="9.5" width="2" height="2" rx="0.25" />
+          <rect x="6.5" y="9.5" width="2" height="2" rx="0.25" />
+          <rect x="9.5" y="9.5" width="2" height="2" rx="0.25" />
+        </svg>
+      </ToggleBtn>
+      <ToggleBtn
         active={value === "list"}
         onClick={() => onChange("list")}
         label="list"
-        gradientColor={inactiveColor(2)}
+        gradientColor={inactiveColor(3)}
       >
         <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
           <rect x="1" y="2" width="10" height="1.5" rx="0.5" />

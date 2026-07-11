@@ -39,7 +39,8 @@ export default function Index() {
   const [view, setView] = useState<ViewMode>(() => {
     try {
       const v = localStorage.getItem(VIEW_STORAGE_KEY);
-      if (v === "list" || v === "grid-sm" || v === "grid") return v;
+      if (v === "list" || v === "grid-sm" || v === "grid-xs" || v === "grid")
+        return v;
       return "grid";
     } catch {
       return "grid";
@@ -278,6 +279,16 @@ export default function Index() {
                       key={`${r.pubkey}:${r.d}`}
                       release={r}
                       density="sm"
+                    />
+                  ))}
+                </div>
+              ) : view === "grid-xs" ? (
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1.5 sm:gap-2">
+                  {paged.map((r) => (
+                    <ReleaseCard
+                      key={`${r.pubkey}:${r.d}`}
+                      release={r}
+                      density="xs"
                     />
                   ))}
                 </div>

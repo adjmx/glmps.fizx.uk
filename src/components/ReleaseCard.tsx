@@ -9,7 +9,7 @@ import OwnerNaddrCopy from "./OwnerNaddrCopy";
 import GenreDotChip from "./GenreDotChip";
 import SourceDot from "./SourceDot";
 
-export type CardDensity = "default" | "sm";
+export type CardDensity = "default" | "sm" | "xs";
 
 type Props = {
   release: Release;
@@ -18,6 +18,45 @@ type Props = {
 
 export default function ReleaseCard({ release, density = "default" }: Props) {
   const naddr = naddrEncode(release.pubkey, RELEASE_KIND, release.d);
+
+  // `xs` is the image-only cover wall: just the artwork and a tiny medium dot.
+  // No reactions fetch, no text — everything expands on the release page.
+  if (density === "xs") {
+    const isPhysical = release.medium === "physical";
+    return (
+      <Link
+        to={`/r/${naddr}`}
+        title={`${release.artist} – ${release.title}`}
+        className="group block rounded-md border border-border bg-card hover:border-primary/40 transition-colors overflow-hidden"
+      >
+        <div className="relative aspect-square bg-gradient-to-br from-muted/40 to-card flex items-center justify-center text-muted-foreground/25">
+          <span
+            title={isPhysical ? "physical release" : "digital release"}
+            aria-hidden="true"
+            className={cn(
+              "absolute top-1 left-1 z-10 w-1.5 h-1.5 rounded-full border",
+              isPhysical
+                ? "bg-accent border-accent/50"
+                : "bg-muted-foreground/50 border-border",
+            )}
+          />
+          {release.image ? (
+            <img
+              src={release.image}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <span className="font-mono text-[8px] uppercase tracking-widest">
+              {isPhysical ? "phys" : "digi"}
+            </span>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
   const addr = `${RELEASE_KIND}:${release.pubkey}:${release.d}`;
   const { forAddr } = useReactions();
   const { up, down, info } = forAddr(addr);
