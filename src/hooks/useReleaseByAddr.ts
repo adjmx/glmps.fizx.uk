@@ -31,11 +31,16 @@ export function useReleaseByAddr(query: AddrQuery | null) {
     const targetCoord = `${query.kind}:${query.pubkey}:${query.identifier}`;
     let latest: NostrEvent | undefined;
     const deletedIds = new Set<string>();
-    let addrDeleted = false; // a-tag delete on targetCoord is a permanent tombstone
+    // Newest `a`-tag deletion on targetCoord. NOT a permanent tombstone: the
+    // coordinate is reused on every republish, so a deletion only kills events
+    // created at or before it (strict NIP-09). See useReleases.ts.
+    let addrDeletedAt: number | undefined;
 
     const apply = () => {
       if (!latest) return;
-      const killed = addrDeleted || deletedIds.has(latest.id);
+      const killed =
+        deletedIds.has(latest.id) ||
+        (addrDeletedAt !== undefined && latest.created_at <= addrDeletedAt);
       setState((s) => ({ ...s, release: killed ? null : parseRelease(latest!) }));
     };
 
@@ -68,8 +73,12 @@ export function useReleaseByAddr(query: AddrQuery | null) {
             if (t[0] === "e" && t[1] && !deletedIds.has(t[1])) {
               deletedIds.add(t[1]);
               touched = true;
-            } else if (t[0] === "a" && t[1] === targetCoord && !addrDeleted) {
-              addrDeleted = true;
+            } else if (
+              t[0] === "a" &&
+              t[1] === targetCoord &&
+              (addrDeletedAt === undefined || ev.created_at > addrDeletedAt)
+            ) {
+              addrDeletedAt = ev.created_at;
               touched = true;
             }
           }
