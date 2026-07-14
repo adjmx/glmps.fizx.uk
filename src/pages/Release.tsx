@@ -88,6 +88,7 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
             release.formatGroup,
             release.tracks ? `${release.tracks} tracks` : undefined,
             release.discs && release.discs > 1 ? `${release.discs} discs` : undefined,
+            release.video ? "video" : undefined,
             release.label,
             release.country,
           ]
@@ -158,6 +159,10 @@ function ReleaseDetail({ release, naddr }: { release: Release; naddr: string }) 
               ? String(release.discs)
               : undefined
           }
+        />
+        <Field
+          label="video"
+          value={release.video ? String(release.video) : undefined}
         />
         <Field label="label" value={release.label} />
         <Field label="catalog" value={release.catalog} />

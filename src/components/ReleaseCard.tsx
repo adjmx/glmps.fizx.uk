@@ -65,6 +65,7 @@ export default function ReleaseCard({ release, density = "default" }: Props) {
     release.formatGroup,
     release.tracks ? `${release.tracks} tracks` : undefined,
     release.discs && release.discs > 1 ? `${release.discs} discs` : undefined,
+    release.video ? "video" : undefined,
     release.label,
     release.country,
   ]
