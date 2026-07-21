@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { NostrLoginProvider } from "@/hooks/useNostrLogin";
 import { OwnerProfileProvider } from "@/hooks/useOwnerProfile";
 import { ReactionsProvider } from "@/hooks/useReactions";
@@ -10,7 +11,8 @@ import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
-    <NostrLoginProvider>
+    <ThemeProvider>
+      <NostrLoginProvider>
       <OwnerProfileProvider>
         <ReactionsProvider>
           <BrowserRouter>
@@ -25,5 +27,6 @@ export default function App() {
         </ReactionsProvider>
       </OwnerProfileProvider>
     </NostrLoginProvider>
+    </ThemeProvider>
   );
 }

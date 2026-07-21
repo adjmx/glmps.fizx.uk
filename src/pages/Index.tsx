@@ -12,6 +12,7 @@ import SearchInput from "@/components/SearchInput";
 import DotMatrixLoader from "@/components/DotMatrixLoader";
 import { useReleases } from "@/hooks/useReleases";
 import { useLabelLibrary } from "@/hooks/useLabelLibrary";
+import { useTheme, THEME_TITLE } from "@/hooks/useTheme";
 import { DEFAULT_RELAYS, OWNER_NPUB, RELEASE_KIND } from "@/config";
 import {
   applyFilters,
@@ -34,6 +35,7 @@ export default function Index() {
 
   const { releases, loading, eose } = useReleases(hex);
   const { library } = useLabelLibrary();
+  const { theme, cycleTheme } = useTheme();
 
   const [filters, setFilters] = useState<FilterState>(emptyFilters);
   const [view, setView] = useState<ViewMode>(() => {
@@ -148,14 +150,22 @@ export default function Index() {
               <div className="flex-1 min-w-0 flex flex-col">
                 <div className="min-h-[110px] grid grid-cols-1 sm:grid-cols-[10rem_minmax(0,1fr)_10rem] divide-y sm:divide-y-0 sm:divide-x divide-border flex-1">
                   <div className="px-4 py-3 min-w-0 flex flex-col justify-center whitespace-nowrap gap-1">
-                    <AnimatedTitle
-                      accent="glmps"
-                      rest=""
-                      from="#34d399"
-                      to="#a78bfa"
-                      suffixRgba="rgba(52,211,153,0.55)"
-                      fontSize="clamp(28px, 5vw, 40px)"
-                    />
+                    <button
+                      type="button"
+                      onClick={cycleTheme}
+                      title={`Theme: ${theme} — tap to switch`}
+                      aria-label={`Colour theme: ${theme}. Tap to switch.`}
+                      className="block text-left transition-opacity hover:opacity-70"
+                    >
+                      <AnimatedTitle
+                        accent="glmps"
+                        rest=""
+                        from={THEME_TITLE[theme].from}
+                        to={THEME_TITLE[theme].to}
+                        suffixRgba={THEME_TITLE[theme].suffixRgba}
+                        fontSize="clamp(28px, 5vw, 40px)"
+                      />
+                    </button>
                     <span className="self-start rounded-full border border-accent text-accent font-mono text-[10px] px-2 py-0.5">
                       31237
                     </span>

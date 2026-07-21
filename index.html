@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark theme-fizx">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,6 +19,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Apply a stored theme before paint (no flash). The theme-<x> class on
+      // <html> above is the fork default; this only overrides it when the
+      // viewer has picked one. Kept identical across both glmps forks.
+      try {
+        var t = localStorage.getItem("glmps.theme");
+        if (t === "fizx" || t === "upleb" || t === "mono") {
+          var cl = document.documentElement.classList;
+          ["theme-fizx", "theme-upleb", "theme-mono"].forEach(function (c) {
+            cl.remove(c);
+          });
+          cl.add("theme-" + t);
+        }
+      } catch (e) {}
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

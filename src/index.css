@@ -19,7 +19,7 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.75rem;
 
-    /* release.v2 genre palette — shared with ndisc + glmps.fizx.uk verbatim.
+    /* release.v2 genre palette — shared with ndisc + the sibling glmps fork verbatim.
        Theme-independent (no .dark override). Reference via rgb(var(--c-g-<slug>) / <alpha>). */
     /* acoustic (primary) */
     --c-g-ambient:       176 199 209;
@@ -73,8 +73,14 @@
     --c-g-footwork-trap: 255 133 200;
   }
 
-  .dark {
-    /* fizx.uk shared palette — emerald primary (Side A), purple accent (Side B) */
+  /* Three colour themes, shared verbatim across BOTH glmps forks — the app is
+     always .dark, and one of these theme-<x> classes rides alongside it on
+     <html> (default baked in index.html, switched by the wordmark tap). Only
+     --primary / --accent / --ring carry the brand hue; the neutral chrome is
+     common to fizx + upleb. mono greys the chrome so colour is reserved for the
+     genre chips (theme-independent, in :root) — never a fork default. */
+  .theme-fizx {
+    /* fizx.uk — emerald primary (Side A), purple accent (Side B) */
     --background: 215 28% 7%;       /* #0d1117 */
     --foreground: 210 40% 98%;
     --card: 215 22% 10%;
@@ -88,6 +94,41 @@
     --border: 215 15% 15%;
     --input: 215 15% 15%;
     --ring: 158 64% 52%;
+  }
+
+  .theme-upleb {
+    /* upleb.uk — coral primary, amber accent */
+    --background: 215 28% 7%;       /* #0d1117 */
+    --foreground: 210 40% 98%;
+    --card: 215 22% 10%;
+    --card-foreground: 210 40% 98%;
+    --primary: 15 100% 64%;         /* coral #FF7849 */
+    --primary-foreground: 215 28% 7%;
+    --muted: 215 18% 14%;
+    --muted-foreground: 215 12% 55%;
+    --accent: 35 100% 64%;          /* amber #FFB347 */
+    --accent-foreground: 215 28% 7%;
+    --border: 215 15% 15%;
+    --input: 215 15% 15%;
+    --ring: 15 100% 64%;
+  }
+
+  .theme-mono {
+    /* Monochrome — greyed chrome, cool near-black base. Mirrors ndisc/nview
+       .theme-mono in glmps's shadcn HSL tokens; genre chips stay coloured. */
+    --background: 240 6% 4%;
+    --foreground: 240 8% 95%;
+    --card: 240 5% 7%;
+    --card-foreground: 240 8% 95%;
+    --primary: 240 6% 92%;
+    --primary-foreground: 240 6% 6%;
+    --muted: 240 5% 14%;
+    --muted-foreground: 240 4% 52%;
+    --accent: 240 5% 80%;
+    --accent-foreground: 240 6% 6%;
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
+    --ring: 240 6% 92%;
   }
 }
 
