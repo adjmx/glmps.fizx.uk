@@ -4,7 +4,7 @@
 # Run from the user's Mac — the sandbox can't reach :2121.
 # Idempotent: safe to re-run.
 #
-#   bash ~/code_vibe/glmps.fizx.uk/server-bootstrap-glmps.sh
+#   bash ~/code_gh/adjmx/glmps.fizx.uk/server-bootstrap-glmps.sh
 #
 # Validator choice: this script uses `certbot --nginx` (NOT `--webroot`).
 # The existing pls.fizx.uk multi-SAN was originally issued via `--nginx`,
@@ -65,5 +65,5 @@ $SSH 'curl -sI -o /dev/null -w "HTTPS %{http_code} via %{remote_ip}\n" https://g
 
 echo ""
 echo "==> Done. If glmps dist isn't already deployed:"
-echo "    cd ~/code_vibe/glmps.fizx.uk && npm install && npm run build"
+echo "    cd ~/code_gh/adjmx/glmps.fizx.uk && npm install && npm run build"
 echo "    rsync -avz --delete -e 'ssh -p ${PORT}' dist/ ${HOST}:/var/www/glmps.fizx.uk/"

@@ -38,7 +38,7 @@ rsync -avz --delete -e "ssh -p 2121" dist/ root@88.218.206.187:/var/www/glmps.fi
 > `location / { try_files $uri $uri/ /index.html; }`
 > so client-side routes resolve.
 
-VPS: `88.218.206.187`. Full server / nginx / SSL / DNS notes for the wider deployment live in the local `code_vibe/CLAUDE.md` (not pushed; this README is the public-facing summary).
+VPS: `88.218.206.187`. Full server / nginx / SSL / DNS notes for the wider deployment live in the local `code_gh/adjmx/CLAUDE.md` (not pushed; this README is the public-facing summary).
 
 ---
 
