@@ -15,7 +15,7 @@ type Props = {
 };
 
 export default function ReactionButtons({ addr, size = "lg" }: Props) {
-  const { pubkey } = useNostrLogin();
+  const { pubkey, via, connecting, error } = useNostrLogin();
   const { forAddr, publish, revoke, canPublish } = useReactions();
   const { up, down, myReaction } = forAddr(addr);
   const myKind = myReaction ? classifyReaction(myReaction.content) : null;
@@ -32,7 +32,11 @@ export default function ReactionButtons({ addr, size = "lg" }: Props) {
   if (!canPublish) {
     return (
       <div className="text-[11px] font-mono text-red-400/80">
-        NIP-07 signer not available — install a Nostr browser extension to vote
+        {via === "bunker"
+          ? connecting
+            ? "connecting to your signer…"
+            : `signer not connected${error ? ` — ${error}` : ""}`
+          : "can't sign here — log in with a browser extension or a remote signer (bunker://) to vote"}
       </div>
     );
   }
@@ -67,6 +71,11 @@ export default function ReactionButtons({ addr, size = "lg" }: Props) {
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
+      {busy && via === "bunker" && (
+        <span className="order-last text-[10px] font-mono text-muted-foreground/60">
+          waiting for your signer…
+        </span>
+      )}
       <button
         type="button"
         disabled={busy !== null}

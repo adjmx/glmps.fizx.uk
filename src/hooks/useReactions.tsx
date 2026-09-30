@@ -53,7 +53,7 @@ const C = createContext<Ctx | null>(null);
 
 export function ReactionsProvider({ children }: { children: ReactNode }) {
   const { ownerHex } = useOwnerProfile();
-  const { pubkey: myPubkey } = useNostrLogin();
+  const { pubkey: myPubkey, canSign, signEvent } = useNostrLogin();
 
   // latestByReleaseAndReactor: per-release → per-reactor → latest kind:7
   const latestRef = useRef<Map<string, Map<string, NostrEvent>>>(new Map());
@@ -172,21 +172,11 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
     return buckets;
   }, []);
 
-  // Signing path: NIP-07 (window.nostr) on desktop. Amber/NIP-55 sign-flow
-  // would need a redirect dance — out of scope for v1; we just no-op.
-  const sign = useCallback(
-    async (template: object): Promise<NostrEvent | null> => {
-      if (typeof window === "undefined" || !window.nostr) return null;
-      try {
-        const signed = (await window.nostr.signEvent(template)) as NostrEvent;
-        return signed && signed.id ? signed : null;
-      } catch (e) {
-        console.warn("sign rejected", e);
-        return null;
-      }
-    },
-    [],
-  );
+  // Signing goes through the login: NIP-07 extension or NIP-46 bunker. A
+  // bunker may wait for a person to approve on a monitor, so this can take a
+  // while; null means refused, expired or no signer. Amber/NIP-55 sign-flow
+  // would need a redirect dance — out of scope; it stays read-only.
+  const sign = signEvent;
 
   const publish = useCallback(
     async (addr: string, content: string) => {
@@ -200,7 +190,6 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
           ["p", ownerHex],
           ["k", String(RELEASE_KIND)],
         ],
-        pubkey: myPubkey,
       });
       if (!event) return;
       let inner = latestRef.current.get(addr);
@@ -242,7 +231,6 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
           ["e", mine.id],
           ["k", "7"],
         ],
-        pubkey: myPubkey,
       });
       if (!deletion) return;
       // Drop locally so the UI flips immediately; other clients catch up
@@ -263,8 +251,7 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
     [myPubkey, relays, sign, bump],
   );
 
-  const canPublish =
-    typeof window !== "undefined" && !!window.nostr && !!myPubkey;
+  const canPublish = canSign;
 
   const value = useMemo<Ctx>(
     () => ({ forAddr, reactorsByAddr, publish, revoke, canPublish }),

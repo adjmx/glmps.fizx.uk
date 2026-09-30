@@ -1,5 +1,23 @@
 # Changelog
 
+## Login and signing
+
+### 2026-09-30 — log in with a remote signer (`bunker://`, NIP-46)
+
+The login button opens a small panel: browser extension (NIP-07, when one is
+present), a **remote signer** — paste a `bunker://` string — or the Android
+signer app (NIP-55, still view-only). With a remote signer the nsec never
+reaches the page: it keeps a throwaway client key in localStorage (`glmps.bunker`,
+with `glmps.loginVia`), reconnects on load, and asks the signer for each
+reaction. A signer may wait for a person to approve, so a vote shows "waiting
+for your signer…" meanwhile; a refusal or expiry leaves the buttons as they were.
+
+Reactions (kind 7) and their deletions (kind 5) now sign through one
+`signEvent` on the login context, whichever way you logged in, and the templates
+no longer carry `pubkey` — the extension or signer fills it in. Code from
+nview's `useSigner.tsx`. Pair the site with every kind asking: its session
+lives in the page's storage, so nothing should sign without a person seeing it.
+
 ## Viewer behaviour
 
 Read-path fixes. These are *not* contract changes — the wire format is
