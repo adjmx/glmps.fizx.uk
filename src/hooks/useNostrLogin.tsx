@@ -43,6 +43,9 @@ type NostrLoginCtx = {
   logout: () => void;
   /** Signs with whichever login is active; null if refused or unavailable. */
   signEvent: (template: EventTemplate) => Promise<NostrEvent | null>;
+  /** Bunker only: why the last signEvent came back null, in the signer's words. */
+  signError: string | null;
+  clearSignError: () => void;
 };
 
 const Ctx = createContext<NostrLoginCtx | null>(null);
@@ -105,6 +108,8 @@ export function NostrLoginProvider({ children }: { children: ReactNode }) {
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bunkerReady, setBunkerReady] = useState(false);
+  const [signError, setSignError] = useState<string | null>(null);
+  const clearSignError = useCallback(() => setSignError(null), []);
   const signerRef = useRef<BunkerSigner | null>(null);
 
   // Strip nostr_pk from the URL once consumed.
@@ -197,6 +202,7 @@ export function NostrLoginProvider({ children }: { children: ReactNode }) {
     setPubkey(null);
     setVia(null);
     setError(null);
+    setSignError(null);
     write(PUBKEY_KEY, null);
     write(VIA_KEY, null);
     write(BUNKER_KEY, null);
@@ -204,6 +210,7 @@ export function NostrLoginProvider({ children }: { children: ReactNode }) {
 
   const signEvent = useCallback(
     async (template: EventTemplate): Promise<NostrEvent | null> => {
+      setSignError(null);
       try {
         if (via === "bunker") {
           const s = signerRef.current;
@@ -217,6 +224,9 @@ export function NostrLoginProvider({ children }: { children: ReactNode }) {
         return signed && signed.id ? signed : null;
       } catch (e) {
         console.warn("sign rejected", e);
+        // A remote signer says why (refused, approval timed out); keep its
+        // words so the page can tell the person instead of just reverting.
+        if (via === "bunker") setSignError(e instanceof Error ? e.message : String(e));
         return null;
       }
     },
@@ -228,8 +238,14 @@ export function NostrLoginProvider({ children }: { children: ReactNode }) {
     (via === "bunker" ? bunkerReady : via === "nip07" && typeof window !== "undefined" && !!window.nostr);
 
   const value = useMemo(
-    () => ({ pubkey, via, connecting, error, canSign, login, loginBunker, logout, signEvent }),
-    [pubkey, via, connecting, error, canSign, login, loginBunker, logout, signEvent],
+    () => ({
+      pubkey, via, connecting, error, canSign, login, loginBunker, logout, signEvent,
+      signError, clearSignError,
+    }),
+    [
+      pubkey, via, connecting, error, canSign, login, loginBunker, logout, signEvent,
+      signError, clearSignError,
+    ],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

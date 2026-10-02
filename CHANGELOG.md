@@ -2,6 +2,15 @@
 
 ## Login and signing
 
+### 2026-10-02 — a refused or expired vote says so
+
+With a remote signer, a vote that was denied or that nobody approved in time
+used to leave the buttons as they were and say nothing. The login context now
+keeps the signer's reply (`signError`), and the vote buttons show one line under
+them: "not signed — the request was denied", "not signed — nobody approved it in
+time", or the signer's own words for anything else. It clears on the next
+attempt and when you move to another release.
+
 ### 2026-10-02 — removing a vote removes every vote you cast on that release
 
 Switching a vote (up, then down) publishes a second kind 7 and the newest wins;

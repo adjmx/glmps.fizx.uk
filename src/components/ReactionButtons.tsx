@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import {
   useReactions,
@@ -14,12 +14,23 @@ type Props = {
   size?: "sm" | "lg";
 };
 
+// The signer's own reply, turned into one line for the person who clicked.
+function signNotice(reason: string): string {
+  const r = reason.toLowerCase();
+  if (r.includes("approval timed out")) return "not signed — nobody approved it in time";
+  if (r.includes("denied")) return "not signed — the request was denied";
+  return `not signed — ${reason}`;
+}
+
 export default function ReactionButtons({ addr, size = "lg" }: Props) {
-  const { pubkey, via, connecting, error } = useNostrLogin();
+  const { pubkey, via, connecting, error, signError, clearSignError } = useNostrLogin();
   const { forAddr, publish, revoke, canPublish } = useReactions();
   const { up, down, myReaction } = forAddr(addr);
   const myKind = myReaction ? classifyReaction(myReaction.content) : null;
   const [busy, setBusy] = useState<null | "up" | "down">(null);
+
+  // A notice belongs to the release it was raised on.
+  useEffect(() => clearSignError, [addr, clearSignError]);
 
   if (!pubkey) {
     return (
@@ -74,6 +85,11 @@ export default function ReactionButtons({ addr, size = "lg" }: Props) {
       {busy && via === "bunker" && (
         <span className="order-last text-[10px] font-mono text-muted-foreground/60">
           waiting for your signer…
+        </span>
+      )}
+      {!busy && via === "bunker" && signError && (
+        <span role="status" className="order-last text-[10px] font-mono text-red-400/80">
+          {signNotice(signError)}
         </span>
       )}
       <button
