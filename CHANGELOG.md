@@ -2,6 +2,15 @@
 
 ## Login and signing
 
+### 2026-10-02 — removing a vote removes every vote you cast on that release
+
+Switching a vote (up, then down) publishes a second kind 7 and the newest wins;
+the first one stays on the relays. Removing the vote then deleted only the
+newest, so the older one came back on the next load — found in the first
+bunker test, on a release that read ↑ 1 again after its ↓ was removed. The
+viewer now remembers every reaction id it has seen per release and reactor, and
+a removal names all of yours in one kind 5. Still one signature.
+
 ### 2026-09-30 — log in with a remote signer (`bunker://`, NIP-46)
 
 The login button opens a small panel: browser extension (NIP-07, when one is

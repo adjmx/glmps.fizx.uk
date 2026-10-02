@@ -57,6 +57,24 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
 
   // latestByReleaseAndReactor: per-release → per-reactor → latest kind:7
   const latestRef = useRef<Map<string, Map<string, NostrEvent>>>(new Map());
+  // Every kind:7 id seen per release → per reactor, not just the latest. A
+  // switched vote leaves the older event on the relays (latest wins, nothing
+  // is deleted), so a removal has to name all of them or the older vote
+  // comes back on the next load.
+  const idsRef = useRef<Map<string, Map<string, Set<string>>>>(new Map());
+  const remember = useCallback((addr: string, pubkey: string, id: string) => {
+    let byReactor = idsRef.current.get(addr);
+    if (!byReactor) {
+      byReactor = new Map();
+      idsRef.current.set(addr, byReactor);
+    }
+    let ids = byReactor.get(pubkey);
+    if (!ids) {
+      ids = new Set();
+      byReactor.set(pubkey, ids);
+    }
+    ids.add(id);
+  }, []);
   const [, forceRender] = useState(0);
   const bump = useCallback(() => forceRender((n) => n + 1), []);
 
@@ -76,6 +94,7 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
         .filter((t) => t[0] === "a" && t[1]?.startsWith(`${RELEASE_KIND}:${ownerHex}:`))
         .map((t) => t[1])[0];
       if (!addr) return;
+      remember(addr, ev.pubkey, ev.id);
       let inner = latestRef.current.get(addr);
       if (!inner) {
         inner = new Map();
@@ -133,7 +152,7 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
       if (retryTimer) clearTimeout(retryTimer);
       sub?.close();
     };
-  }, [ownerHex, relays, bump]);
+  }, [ownerHex, relays, bump, remember]);
 
   const forAddr = useCallback(
     (addr: string): ReactionAgg => {
@@ -192,6 +211,7 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
         ],
       });
       if (!event) return;
+      remember(addr, event.pubkey, event.id);
       let inner = latestRef.current.get(addr);
       if (!inner) {
         inner = new Map();
@@ -214,7 +234,7 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
         throw new Error("reaction not accepted by any relay");
       }
     },
-    [myPubkey, ownerHex, relays, sign, bump],
+    [myPubkey, ownerHex, relays, sign, bump, remember],
   );
 
   const revoke = useCallback(
@@ -223,14 +243,14 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
       const inner = latestRef.current.get(addr);
       const mine = inner?.get(myPubkey);
       if (!inner || !mine) return;
+      // All of this user's reactions to the release, the superseded ones too.
+      const mineIds = idsRef.current.get(addr)?.get(myPubkey);
+      const ids = new Set(mineIds ?? []).add(mine.id);
       const deletion = await sign({
         kind: 5,
         created_at: Math.floor(Date.now() / 1000),
         content: "",
-        tags: [
-          ["e", mine.id],
-          ["k", "7"],
-        ],
+        tags: [...[...ids].map((id) => ["e", id]), ["k", "7"]],
       });
       if (!deletion) return;
       // Drop locally so the UI flips immediately; other clients catch up
@@ -247,6 +267,7 @@ export function ReactionsProvider({ children }: { children: ReactNode }) {
         bump();
         throw new Error("reaction removal not accepted by any relay");
       }
+      mineIds?.clear();
     },
     [myPubkey, relays, sign, bump],
   );
