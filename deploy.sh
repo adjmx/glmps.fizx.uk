@@ -14,7 +14,9 @@ if [ ! -d node_modules ]; then npm ci --silent; fi
 npm run build
 
 echo "▸ rsync → $SERVER:$REMOTE_PATH"
-rsync -avz --delete \
+# nginx only reads, so force world-readable modes rather than copying whatever
+# the local files happen to have. --chmod needs real rsync (not macOS openrsync).
+rsync -avz --delete --chmod=D755,F644 \
   --exclude='.DS_Store' \
   dist/ "$SERVER:$REMOTE_PATH/"
 
