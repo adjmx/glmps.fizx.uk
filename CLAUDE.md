@@ -67,10 +67,11 @@ Outside `src/`, each fork also has its own `public/` icons and manifest,
 (`.theme-fizx` / `.theme-upleb` / `.theme-mono`) ship in every fork. The
 default is set by the class in `index.html`, not by which rules exist. Do not
 "reconcile" that class away — it *is* the divergence. `src/hooks/useTheme.tsx`,
-`App.tsx` and the title wiring are shared verbatim. `mono` is the default of
-the nfunc fork only; the two coloured forks never default to it. (Comments in
-`useTheme.tsx` and `index.css` still say mono is never a fork default — true
-when they were written, for two forks.)
+`App.tsx` and the title wiring are shared verbatim. **Monochrome is the
+default going forward**, for apps and sites alike: the nfunc fork defaults to
+`mono`, and so does anything new. The two coloured forks keep their own colour
+as the default they were built with; a colour theme that ships alongside mono
+is fine, it is just not the default.
 
 **The nfunc fork's nav has one subdomain, so its strip is empty.** `SUBS` there
 lists only what exists under that domain; more are expected, and each is added

@@ -6,11 +6,12 @@ import {
   type ReactNode,
 } from "react";
 
-// Colour theme. All three palettes ship in BOTH glmps forks (index.css) so
-// either site knows every theme; the ONLY per-fork divergence is which one is
+// Colour theme. All three palettes ship in EVERY glmps fork (index.css) so
+// each site knows every theme; the ONLY per-fork divergence is which one is
 // the default, baked as `theme-<x>` on <html> in index.html. Cycled by tapping
-// the glmps wordmark, mirroring nview's title-tap. mono is available but is
-// never a fork default ("glmps without monochrome" = not the default).
+// the glmps wordmark, mirroring nview's title-tap. mono is the default going
+// forward: glmps.nfunc defaults to it, and the two coloured forks keep their
+// own colour as the default they were built with.
 export type Theme = "fizx" | "upleb" | "mono";
 
 const THEME_KEY = "glmps.theme";
@@ -31,9 +32,10 @@ export const THEME_TITLE: Record<
   mono: { from: "#e8e8ec", to: "#c6c6cc", suffixRgba: "rgba(232,232,236,0.2)" },
 };
 
-// The fork's own brand — the theme-<x> class index.html bakes onto <html> — is
-// the default when the viewer hasn't picked one. Read it off the element so the
-// same code yields upleb on glmps.upleb and fizx on glmps.fizx.
+// The fork's own default — the theme-<x> class index.html bakes onto <html> —
+// applies when the viewer hasn't picked one. Read it off the element so the
+// same code yields upleb on glmps.upleb, fizx on glmps.fizx and mono on
+// glmps.nfunc.
 function forkDefault(): Theme {
   if (typeof document !== "undefined") {
     const cl = document.documentElement.classList;

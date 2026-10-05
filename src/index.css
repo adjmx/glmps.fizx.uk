@@ -73,12 +73,12 @@
     --c-g-footwork-trap: 255 133 200;
   }
 
-  /* Three colour themes, shared verbatim across BOTH glmps forks — the app is
+  /* Three colour themes, shared verbatim across EVERY glmps fork — the app is
      always .dark, and one of these theme-<x> classes rides alongside it on
      <html> (default baked in index.html, switched by the wordmark tap). Only
      --primary / --accent / --ring carry the brand hue; the neutral chrome is
      common to fizx + upleb. mono greys the chrome so colour is reserved for the
-     genre chips (theme-independent, in :root) — never a fork default. */
+     genre chips (theme-independent, in :root); it is the nfunc fork's default. */
   .theme-fizx {
     /* fizx.uk — emerald primary (Side A), purple accent (Side B) */
     --background: 215 28% 7%;       /* #0d1117 */
