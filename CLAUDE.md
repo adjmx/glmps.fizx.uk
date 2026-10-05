@@ -11,12 +11,13 @@ the palette and top-bar grammar, and the `CLAUDE.md` tiering. Read it **before
 making a platform-sensitive or contract-sensitive choice**; it records
 constraints that are invisible from inside this repo.
 
-## This file is deliberately identical in both forks
+## This file is deliberately identical in all three forks
 
-glmps exists twice — `glmps.upleb.uk` and `glmps.fizx.uk` — and this file is
-byte-identical in both. It therefore never says "this fork is the upleb one".
-It cannot: a file that differed per fork would be one more thing to drift, and
-drift between the forks is the failure this repo keeps having.
+glmps exists three times — `glmps.upleb.uk`, `glmps.fizx.uk` and
+`glmps.nfunc.xyz` — and this file is byte-identical in all of them. It
+therefore never says "this fork is the upleb one". It cannot: a file that
+differed per fork would be one more thing to drift, and drift between the
+forks is the failure this repo keeps having.
 
 **To tell which fork you are in, read `index.html`.** The `theme-<x>` class on
 `<html>` is the fork identity, and `package.json`'s `name` agrees with it.
@@ -41,41 +42,50 @@ means a vendored schema was edited in place instead of re-vendored from ndisc.
 ## The lockstep contract
 
 Any change to a shared pattern — nav, hero, components, hooks, deploy script,
-vendored schema — **must land in both forks in the same session.** Committing
-to one and stopping is the recurring bug this section exists to prevent.
-`diff -rq` the two `src/` trees before finishing.
+vendored schema — **must land in all three forks in the same session.**
+Committing to one and stopping is the recurring bug this section exists to
+prevent. `diff -rq` the `src/` trees against each other before finishing.
 
 ### What is allowed to differ, verified
 
-Seven files, and no others:
+Seven source files, and no others:
 
 | File | Legitimate difference |
 |---|---|
-| `index.html` | `theme-<x>` class on `<html>`, `<title>`, `og:title` |
+| `index.html` | `theme-<x>` class on `<html>`, `<title>`, `og:title`, `theme-color` |
 | `package.json` | `name` |
-| `src/components/Nav.tsx` | sibling hostnames and brand href |
-| `src/pages/Index.tsx` | footer-chip hex literals and hostnames |
+| `src/components/Nav.tsx` | the `SUBS` list, sibling hostnames, brand href, source link |
+| `src/pages/Index.tsx` | footer chips: hex literals, hostnames and the first chip's glyph |
 | `src/components/NostrHandshake.tsx` | shaka fill — **see the asymmetry below** |
 | `src/components/AnimatedTitle.tsx` | *comment only — drift, reconcile* |
 | `src/hooks/useRelayStats.ts` | *comment only — drift, reconcile* |
 
+Outside `src/`, each fork also has its own `public/` icons and manifest,
+`deploy.sh`, `README.md` and nginx vhost file.
+
 `src/index.css` is **fully byte-identical**: all three themes
-(`.theme-fizx` / `.theme-upleb` / `.theme-mono`) ship in both forks. The
+(`.theme-fizx` / `.theme-upleb` / `.theme-mono`) ship in every fork. The
 default is set by the class in `index.html`, not by which rules exist. Do not
 "reconcile" that class away — it *is* the divergence. `src/hooks/useTheme.tsx`,
-`App.tsx` and the title wiring are shared verbatim. `mono` ships in both and is
-never a fork default.
+`App.tsx` and the title wiring are shared verbatim. `mono` is the default of
+the nfunc fork only; the two coloured forks never default to it. (Comments in
+`useTheme.tsx` and `index.css` still say mono is never a fork default — true
+when they were written, for two forks.)
+
+**The nfunc fork's nav has one subdomain, so its strip is empty.** `SUBS` there
+lists only what exists under that domain; more are expected, and each is added
+to the list when it is built. Do not copy the coloured forks' five names in.
 
 **Two of those seven are pure drift.** `AnimatedTitle.tsx` and
 `useRelayStats.ts` differ only in a provenance comment naming a sibling site.
 Nothing functional. They should be made identical the next time either is
 touched; they are listed here so the difference is not mistaken for intent.
 
-**One is a real asymmetry, not a palette literal.** In `NostrHandshake.tsx` one
-fork fills the shaka with a flat colour and the other with an SVG
+**One is a real asymmetry, not a palette literal.** In `NostrHandshake.tsx` two
+forks fill the shaka with a flat colour and the third with an SVG
 `linearGradient` plus its `<defs>`. That is a structural difference wearing a
 palette difference's clothes. Decide it deliberately — either both get the
-gradient with per-fork stops, or both go flat — rather than carrying it
+gradient with per-fork stops, or all go flat — rather than carrying it
 forward as though it were sanctioned.
 
 ## Traps specific to this repo
@@ -99,7 +109,7 @@ forward as though it were sanctioned.
 - **`glmps` is the canonical copy of the shared `lib/` core**, which `nview`
   ports *from*. Fix a lib bug here first, then port. `DISPLAY_CAP` divergence
   between them is intentional.
-- **This is the only site whose nginx vhost uses SPA fallback**
+- **glmps is the only site in its family whose nginx vhost uses SPA fallback**
   (`try_files $uri $uri/ /index.html;`) so `/r/<naddr>` deep links resolve. The
   vhost lives in the repo. A deploy that drops it breaks every shared link.
 
