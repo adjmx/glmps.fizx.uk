@@ -30,15 +30,18 @@ npm run dev
 ## Build + deploy
 
 ```bash
-npm run build
-rsync -avz --delete -e "ssh -p 2121" dist/ root@88.218.206.187:/var/www/glmps.fizx.uk/
+./deploy.sh
 ```
+
+Builds, then rsyncs `dist/` to the webroot. The script names the server by an
+SSH host alias (`fizx.uk` in `~/.ssh/config`), which carries the user, port and
+key.
 
 > nginx vhost for this site uses an SPA fallback:
 > `location / { try_files $uri $uri/ /index.html; }`
 > so client-side routes resolve.
 
-VPS: `88.218.206.187`. Full server / nginx / SSL / DNS notes for the wider deployment live in the local `code_gh/adjmx/CLAUDE.md` (not pushed; this README is the public-facing summary).
+Server addresses and the nginx / SSL / DNS notes for the wider deployment live in the local `code_gh/adjmx/CLAUDE.md` (not pushed; this README is the public-facing summary).
 
 ---
 

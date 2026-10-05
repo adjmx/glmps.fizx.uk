@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# Bootstrap glmps.fizx.uk on the fizx VPS (88.218.206.187).
+# Bootstrap glmps.fizx.uk on the fizx VPS.
 #
-# Run from the user's Mac — the sandbox can't reach :2121.
+# HISTORICAL — this ran once, as root, when root login was still on. It is
+# kept as the record of how the site was set up. Root login is off now and
+# sudo asks for a password, so it will not run as written: every step below
+# needs root on the server and would have to be done there by hand with sudo.
+#
+# Run from the user's Mac — the sandbox can't reach the server.
 # Idempotent: safe to re-run.
 #
 #   bash ~/code_gh/adjmx/glmps.fizx.uk/server-bootstrap-glmps.sh
@@ -20,10 +25,9 @@
 
 set -euo pipefail
 
-HOST=root@88.218.206.187
-PORT=2121
-SSH="ssh -p ${PORT} ${HOST}"
-SCP="scp -P ${PORT}"
+HOST=fizx.uk   # an SSH host alias; the user, port and key live in ~/.ssh/config
+SSH="ssh ${HOST}"
+SCP="scp"
 
 cd "$(dirname "$0")"
 
@@ -65,5 +69,4 @@ $SSH 'curl -sI -o /dev/null -w "HTTPS %{http_code} via %{remote_ip}\n" https://g
 
 echo ""
 echo "==> Done. If glmps dist isn't already deployed:"
-echo "    cd ~/code_gh/adjmx/glmps.fizx.uk && npm install && npm run build"
-echo "    rsync -avz --delete -e 'ssh -p ${PORT}' dist/ ${HOST}:/var/www/glmps.fizx.uk/"
+echo "    cd ~/code_gh/adjmx/glmps.fizx.uk && ./deploy.sh"
