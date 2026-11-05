@@ -348,12 +348,6 @@ export default function Index() {
       <footer className="border-t border-border px-6 py-4">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs font-mono">
           <div className="flex items-center gap-4">
-            <a href="https://ln.fizx.uk" className="flex items-center gap-1.5 text-muted-foreground/60 hover:text-primary transition-colors">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#a78bfa" aria-hidden="true">
-                <path d="M13 2L4.5 13.5H11L10 22L20.5 10.5H14L13 2z"/>
-              </svg>
-              <span>ln<span className="text-muted-foreground/40">.fizx.uk</span></span>
-            </a>
             <a href="https://relay.nfunc.xyz" className="flex items-center gap-1.5 text-muted-foreground/60 hover:text-primary transition-colors">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
