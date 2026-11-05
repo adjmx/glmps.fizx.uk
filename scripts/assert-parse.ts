@@ -55,15 +55,13 @@ const noD = parseRelease({
 } as NostrEvent);
 check("event without a d-tag is rejected", noD === null);
 
-// release.v2 — full fixture has three ordered genre slots.
+// release.v2 — full fixture uses all five ordered genre slots (2026-11 cap).
 const v2full = parseRelease(load("release-31237-v2.full.json"));
 check("v2 full: parsed", v2full !== null);
-check("v2 full: 3 genre slots", v2full?.genres.length === 3);
+check("v2 full: 5 genre slots", v2full?.genres.length === 5);
 check(
-  "v2 full: slot order preserved (techno, dub, downtempo)",
-  v2full?.genres[0] === "techno" &&
-    v2full?.genres[1] === "dub" &&
-    v2full?.genres[2] === "downtempo",
+  "v2 full: slot order preserved (ambient, techno, dub, minimal, abstract)",
+  v2full?.genres.join(",") === "ambient,techno,dub,minimal,abstract",
 );
 // release.v2 additive: the `tracks` tag parses to a number.
 check("v2 full: tracks parsed = 12", v2full?.tracks === 12);
@@ -102,13 +100,25 @@ check(
 );
 const unknown = parseRelease(withGenres(["bogus", "techno"]));
 check("v2 invariant: unknown slug dropped", unknown?.genres.join(",") === "techno");
-const overflow = parseRelease(
-  withGenres(["techno", "jazz", "funk", "rock"]),
+const five = parseRelease(
+  withGenres(["techno", "jazz", "funk", "rock", "world"]),
 );
 check(
-  "v2 invariant: 4th slot ignored",
-  overflow?.genres.length === 3 &&
-    overflow?.genres.join(",") === "techno,jazz,funk",
+  "v2 invariant: 5 slots kept",
+  five?.genres.join(",") === "techno,jazz,funk,rock,world",
+);
+const overflow = parseRelease(
+  withGenres(["techno", "jazz", "funk", "rock", "world", "dub"]),
+);
+check(
+  "v2 invariant: 6th slot ignored",
+  overflow?.genres.length === 5 &&
+    overflow?.genres.join(",") === "techno,jazz,funk,rock,world",
+);
+const newSlugs = parseRelease(withGenres(["minimal", "abstract", "world"]));
+check(
+  "v2 2026-11: minimal / abstract / world are known slugs",
+  newSlugs?.genres.join(",") === "minimal,abstract,world",
 );
 
 if (failed > 0) {

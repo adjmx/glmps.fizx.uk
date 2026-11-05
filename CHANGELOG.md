@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### release.v2 — 2026-11 genre round, re-vendored 2026-11-05
+
+**Contract:** `release.v2` @ `03f312cfc5f9b4906211de41d7d0142e34330925cd56a8808ed119d4fd34fb42`
+
+- Source: [xjmzx/ndisc](https://github.com/xjmzx/ndisc) `schema/release.v2.json`. SHA-256 `91e16cf1…` → `03f312cf…` (re-pinned in `schema/release.v2.json.sha256`). Additive, **not** a v3 bump.
+- Genre vocabulary 38 → **41 active slugs**: **`minimal`** (electronic), **`abstract`** + **`world`** (tertiary). Labels verbatim.
+- `genreInvariants.slotCap` 3 → **5**: `normaliseGenres` now keeps up to five ordered genre slots (`GENRE_SLOT_CAP`). The release page, card dot chip, filter and stats already iterate every slot, so all five show.
+- `index.css` gains `--c-g-{minimal,abstract,world}` (theme-neutral, same in every fork).
+- Fixtures `release-31237-v2.full.json` (now five genre slots; local `tracks`/`discs`/`video` tags kept) and `release-31237-v2.partial.json` re-vendored; `assert-parse.ts` checks the 5-slot order, a 6th-slot overflow and the three new slugs.
+
 ## Login and signing
 
 ### 2026-10-02 — a refused or expired vote says so

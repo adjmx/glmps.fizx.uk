@@ -66,6 +66,10 @@
     --c-g-garage:         96 186 224;
     --c-g-conscious:     156 138  84;
     --c-g-turntablism:   116 120 134;
+    /* 2026-11 genre round — minimal (electronic), abstract/world (tertiary) */
+    --c-g-minimal:       255 240 140;
+    --c-g-abstract:      210 140 230;
+    --c-g-world:         140 170  80;
     /* deprecated compound pairs — legacy reads only, render with slash */
     --c-g-classical-folk:232 220 195;
     --c-g-dnb-jungle:    160  39 135;

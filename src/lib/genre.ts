@@ -3,7 +3,7 @@
  *
  * Source of truth: schema/release.v2.json — keep this file in sync with the
  * grouped `genreSlugs` (acoustic / electronic / bridge / tertiary). The
- * grouping is semantic + palette ONLY — not a hierarchy; all 38 active slugs
+ * grouping is semantic + palette ONLY — not a hierarchy; all 41 active slugs
  * are pure peers. Validation matches the schema's strict-but-recoverable
  * posture: unknown slugs are dropped silently, never thrown.
  *
@@ -49,6 +49,7 @@ export const GENRE_ELECTRONIC = [
   "garage",
   "house",
   "jungle",
+  "minimal",
   "techno",
 ] as const;
 
@@ -57,12 +58,14 @@ export const GENRE_BRIDGE = ["dub", "noise"] as const;
 
 // Tertiary / optional — cross-cutting styles.
 export const GENRE_TERTIARY = [
+  "abstract",
   "boom-bap",
   "conscious",
   "lo-fi",
   "trance",
   "trap",
   "turntablism",
+  "world",
 ] as const;
 
 // Retired slugs — never emitted; valid for legacy reads only. The four compound
@@ -76,6 +79,10 @@ export const GENRE_DEPRECATED = [
   "poetry",
   "spiritual",
 ] as const;
+
+// Genre slots per release — release.v2 `genreInvariants.slotCap` (3 → 5 in
+// the 2026-11 round). First slot = highest priority.
+export const GENRE_SLOT_CAP = 5;
 
 // Picker / display order: acoustic → electronic → bridge → tertiary.
 export const GENRE_ORDER = [
@@ -132,7 +139,7 @@ export function genreLabel(slug: string): string {
 /**
  * Apply release.v2 §"Slot semantics + invariants" on read. Strict-but-
  * recoverable — unknown slugs dropped, duplicates collapsed to first
- * occurrence, capped at 3 slots, slot order preserved.
+ * occurrence, capped at GENRE_SLOT_CAP (5) slots, slot order preserved.
  *
  * All slugs are pure peers — no parent/sub gating. Deprecated compound pairs
  * still parse (they're in KNOWN) so legacy events keep their genres.
@@ -141,7 +148,7 @@ export function normaliseGenres(raw: readonly string[]): GenreSlug[] {
   const out: GenreSlug[] = [];
   const seen = new Set<string>();
   for (const s of raw) {
-    if (out.length >= 3) break;
+    if (out.length >= GENRE_SLOT_CAP) break;
     if (!isGenreSlug(s)) continue;
     if (seen.has(s)) continue;
     seen.add(s);

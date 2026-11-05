@@ -26,9 +26,9 @@ export type Release = {
   externalIds: string[];
   tags: string[];
   /**
-   * release.v2 — ordered 0–3 genre slots. Slot 0 = primary, slot 1 = secondary,
-   * slot 2 = tertiary. Normalised on parse: unknown slugs dropped, duplicates
-   * removed, capped at 3, slot order preserved. v2.1 flattened the cross-slot
+   * release.v2 — ordered 0–5 genre slots (cap raised 3 → 5 in the 2026-11
+   * round). Slot 0 = primary, then descending priority. Normalised on parse:
+   * unknown slugs dropped, duplicates removed, capped at 5, slot order preserved. v2.1 flattened the cross-slot
    * invariants — `electronic` + a sub may coexist. v1 events parse to `[]`.
    */
   genres: GenreSlug[];
@@ -442,7 +442,7 @@ export function applyFilters(releases: Release[], f: FilterState): Release[] {
       if (!d || !f.decade.has(d)) return false;
     }
     if (f.genre.size > 0) {
-      // Any-slot match — release passes if ANY of its 0–3 genre slots is in
+      // Any-slot match — release passes if ANY of its 0–5 genre slots is in
       // the selected set. Primary-only would hide v2-multi-tagged releases.
       let any = false;
       for (const g of r.genres) {

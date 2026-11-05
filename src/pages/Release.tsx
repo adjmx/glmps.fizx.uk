@@ -268,7 +268,7 @@ function Field({ label, value }: { label: string; value?: string }) {
 }
 
 /**
- * release.v2 — ordered 0–3 genre slots displayed as a row of colored dots +
+ * release.v2 — ordered 0–5 genre slots, all displayed, as a row of colored dots +
  * names. Slot 0 (the primary) comes first. Hidden when the release carries no
  * genre tags. Slug → label via `genreLabel` (preserves the `soundtrack` → `film`
  * override and the compound-slug slash rule).
