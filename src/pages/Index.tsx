@@ -354,11 +354,11 @@ export default function Index() {
               </svg>
               <span>ln<span className="text-muted-foreground/40">.fizx.uk</span></span>
             </a>
-            <a href="https://relay.fizx.uk" className="flex items-center gap-1.5 text-muted-foreground/60 hover:text-primary transition-colors">
+            <a href="https://relay.nfunc.xyz" className="flex items-center gap-1.5 text-muted-foreground/60 hover:text-primary transition-colors">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
               </svg>
-              <span>relay<span className="text-muted-foreground/40">.fizx.uk</span></span>
+              <span>relay<span className="text-muted-foreground/40">.nfunc.xyz</span></span>
             </a>
           </div>
           <span className="text-primary/60">✦ built with claude</span>

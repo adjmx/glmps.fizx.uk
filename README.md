@@ -18,7 +18,7 @@
 - `kind:7` — reactions on releases (any signed-in user)
 - `kind:0` — profile metadata
 
-Owner = `nurture@fizx.uk` (`OWNER_NPUB` in `src/config.ts`). Only the owner sees edit/publish UI; any other signed-in user can react. Reads from `wss://relay.fizx.uk`, `wss://nos.lol`, `wss://relay.primal.net`. **nginx vhost needs SPA fallback** (`try_files $uri $uri/ /index.html;`) so `/r/<naddr>` deep links resolve.
+Owner = `nurture@fizx.uk` (`OWNER_NPUB` in `src/config.ts`). Only the owner sees edit/publish UI; any other signed-in user can react. Reads from `wss://relay.nfunc.xyz`. **nginx vhost needs SPA fallback** (`try_files $uri $uri/ /index.html;`) so `/r/<naddr>` deep links resolve.
 
 ## Develop
 
